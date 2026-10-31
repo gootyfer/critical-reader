@@ -27,6 +27,7 @@ type RestoredAttribute = string | null;
 
 interface HighlightRecord {
   element: HTMLParagraphElement;
+  description: HTMLElement;
   attributes: Record<string, RestoredAttribute>;
   removeListeners: () => void;
 }
@@ -63,7 +64,7 @@ export function createReaderUi(document: Document): ReaderUi {
     <style>
       :host { all: initial; }
       [hidden] { display: none !important; }
-      #status, #popover {
+      #status, #critical-reader-popover {
         box-sizing: border-box;
         color: #202124;
         font: 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -80,7 +81,7 @@ export function createReaderUi(document: Document): ReaderUi {
         right: 16px;
         top: 16px;
       }
-      #popover {
+      #critical-reader-popover {
         background: white;
         border: 1px solid #c8a900;
         border-radius: 10px;
@@ -89,17 +90,19 @@ export function createReaderUi(document: Document): ReaderUi {
         padding: 12px 14px;
         width: max-content;
       }
-      #popover strong { display: block; margin-bottom: 4px; }
-      #popover p { margin: 6px 0 0; }
+      #critical-reader-popover strong { display: block; margin-bottom: 4px; }
+      #critical-reader-popover p { margin: 6px 0 0; }
       #mechanism { color: #5f5200; font-size: 12px; }
     </style>
     <div id="status" role="status" aria-live="polite" hidden></div>
-    <div id="popover" role="dialog" aria-label="Explicación de Critical Reader" hidden></div>
+    <div id="critical-reader-popover" role="tooltip" hidden></div>
   `;
   document.documentElement.append(host);
 
   const status = shadow.querySelector<HTMLElement>("#status")!;
-  const popover = shadow.querySelector<HTMLElement>("#popover")!;
+  const popover = shadow.querySelector<HTMLElement>(
+    "#critical-reader-popover",
+  )!;
   const highlightRecords: HighlightRecord[] = [];
   let activeElement: HTMLParagraphElement | null = null;
   let pinnedElement: HTMLParagraphElement | null = null;
@@ -144,6 +147,7 @@ export function createReaderUi(document: Document): ReaderUi {
     hidePopover();
     for (const record of highlightRecords.splice(0)) {
       record.removeListeners();
+      record.description.remove();
       for (const [name, value] of Object.entries(record.attributes)) {
         restoreAttribute(record.element, name, value);
       }
@@ -173,16 +177,28 @@ export function createReaderUi(document: Document): ReaderUi {
 
   return {
     showLoading() {
+      if (destroyed) {
+        return;
+      }
+
       status.textContent = "Analizando este artículo…";
       status.hidden = false;
     },
 
     showError(message) {
+      if (destroyed) {
+        return;
+      }
+
       status.textContent = message;
       status.hidden = false;
     },
 
     renderFindings(extracted, response) {
+      if (destroyed) {
+        return;
+      }
+
       clearHighlights();
 
       if (response.findings.length === 0) {
@@ -204,9 +220,8 @@ export function createReaderUi(document: Document): ReaderUi {
           "style",
           HIGHLIGHT_ATTRIBUTE,
           "tabindex",
-          "aria-haspopup",
           "aria-expanded",
-          "aria-controls",
+          "aria-describedby",
         ]) {
           attributes[name] = element.getAttribute(name);
         }
@@ -216,10 +231,30 @@ export function createReaderUi(document: Document): ReaderUi {
         element.style.borderRadius = "3px";
         element.style.cursor = "pointer";
         element.tabIndex = 0;
-        element.setAttribute("aria-haspopup", "dialog");
         element.setAttribute("aria-expanded", "false");
-        element.setAttribute("aria-controls", "critical-reader-popover");
-        popover.id = "critical-reader-popover";
+
+        const description = document.createElement("span");
+        description.id = `critical-reader-description-${highlightRecords.length}`;
+        description.setAttribute("data-critical-reader-description", "");
+        description.textContent = `${CATEGORY_LABELS[finding.category]}. ${MECHANISM_LABELS[finding.mechanism]}. ${finding.explanation}`;
+        Object.assign(description.style, {
+          border: "0",
+          clip: "rect(0 0 0 0)",
+          height: "1px",
+          margin: "-1px",
+          overflow: "hidden",
+          padding: "0",
+          position: "absolute",
+          whiteSpace: "nowrap",
+          width: "1px",
+        });
+        (document.body ?? document.documentElement).append(description);
+
+        const existingDescription = attributes["aria-describedby"];
+        element.setAttribute(
+          "aria-describedby",
+          [existingDescription, description.id].filter(Boolean).join(" "),
+        );
 
         const onMouseEnter = () => showPopover(element, finding, false);
         const onMouseLeave = () => {
@@ -249,6 +284,7 @@ export function createReaderUi(document: Document): ReaderUi {
 
         highlightRecords.push({
           element,
+          description,
           attributes,
           removeListeners() {
             element.removeEventListener("mouseenter", onMouseEnter);

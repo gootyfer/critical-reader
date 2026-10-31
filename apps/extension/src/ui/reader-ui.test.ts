@@ -54,7 +54,7 @@ function popover() {
     "[data-critical-reader-host]",
   );
   const element = host?.shadowRoot?.querySelector<HTMLElement>(
-    "[role='dialog']",
+    "[role='tooltip']",
   );
 
   if (!element) {
@@ -86,7 +86,8 @@ describe("createReaderUi", () => {
     expect(first.dataset.criticalReaderHighlight).toBe("true");
     expect(first.style.backgroundColor).toBe("rgba(255, 221, 64, 0.45)");
     expect(first.tabIndex).toBe(0);
-    expect(first.getAttribute("aria-haspopup")).toBe("dialog");
+    expect(first.getAttribute("aria-haspopup")).toBeNull();
+    expect(first.getAttribute("aria-describedby")).toBeTruthy();
     expect(second.dataset.criticalReaderHighlight).toBeUndefined();
     expect(
       document.querySelectorAll("[data-critical-reader-highlight]"),
@@ -100,6 +101,7 @@ describe("createReaderUi", () => {
 
     first.dispatchEvent(new MouseEvent("mouseenter"));
 
+    expect(popover().id).toBe("critical-reader-popover");
     expect(popover().hidden).toBe(false);
     expect(popover().textContent).toContain("Machismo");
     expect(popover().textContent).toContain("Estereotipo");
@@ -133,6 +135,24 @@ describe("createReaderUi", () => {
     expect(first.getAttribute("aria-expanded")).toBe("false");
   });
 
+  it("associates an accessible light-DOM description with the paragraph", () => {
+    const first = document.querySelector<HTMLParagraphElement>("#first")!;
+    const ui = createReaderUi(document);
+    ui.renderFindings(extractedArticle(), response);
+
+    const descriptionId = first.getAttribute("aria-describedby");
+    const description = descriptionId
+      ? document.getElementById(descriptionId)
+      : null;
+
+    expect(description).not.toBeNull();
+    expect(description?.textContent).toContain("Machismo");
+    expect(description?.textContent).toContain("Estereotipo");
+    expect(description?.textContent).toContain(
+      "Atribuye una incapacidad a las mujeres como grupo.",
+    );
+  });
+
   it("reports loading, errors and an empty result inside the shadow UI", () => {
     const ui = createReaderUi(document);
     const host = document.querySelector<HTMLElement>(
@@ -163,8 +183,21 @@ describe("createReaderUi", () => {
     expect(first.getAttribute("style")).toBe(originalStyle);
     expect(first.hasAttribute("data-critical-reader-highlight")).toBe(false);
     expect(first.hasAttribute("tabindex")).toBe(false);
-    expect(first.hasAttribute("aria-haspopup")).toBe(false);
     expect(first.hasAttribute("aria-expanded")).toBe(false);
+    expect(first.hasAttribute("aria-describedby")).toBe(false);
+    expect(document.querySelector("[data-critical-reader-description]")).toBeNull();
+  });
+
+  it("ignores a late response after the UI has been destroyed", () => {
+    const first = document.querySelector<HTMLParagraphElement>("#first")!;
+    const ui = createReaderUi(document);
+    const extracted = extractedArticle();
+
+    ui.destroy();
+    ui.renderFindings(extracted, response);
+
+    expect(first.hasAttribute("data-critical-reader-highlight")).toBe(false);
+    expect(document.querySelector("[data-critical-reader-host]")).toBeNull();
   });
 
   it("keeps a single shadow host when the UI is created again", () => {

@@ -38,6 +38,10 @@ export default defineContentScript({
         message,
       )) as AnalyzeArticleResult | undefined;
 
+      if (pageState[UI_STATE_KEY] !== ui) {
+        return;
+      }
+
       if (!result?.ok) {
         ui.showError(
           "No se pudo analizar. Comprueba que el servidor local esté funcionando.",
@@ -47,6 +51,10 @@ export default defineContentScript({
 
       ui.renderFindings(extracted, result.data);
     } catch {
+      if (pageState[UI_STATE_KEY] !== ui) {
+        return;
+      }
+
       ui.showError(
         "No se pudo analizar. Comprueba que el servidor local esté funcionando.",
       );

@@ -23,16 +23,51 @@ function visibleText(element: Element | null): string {
     return "";
   }
 
-  return normalizeText(element.textContent ?? "");
+  const textParts: string[] = [];
+
+  const visit = (node: Node) => {
+    if (node.nodeType === node.TEXT_NODE) {
+      textParts.push(node.textContent ?? "");
+      return;
+    }
+
+    if (!(node instanceof Element) || !isVisible(node)) {
+      return;
+    }
+
+    if (["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE"].includes(node.tagName)) {
+      return;
+    }
+
+    node.childNodes.forEach(visit);
+  };
+
+  element.childNodes.forEach(visit);
+  return normalizeText(textParts.join(" "));
 }
 
 function isVisible(element: Element): boolean {
-  if (element.closest("[hidden], [aria-hidden='true']")) {
-    return false;
+  let current: Element | null = element;
+
+  while (current) {
+    if (current.hasAttribute("hidden") || current.getAttribute("aria-hidden") === "true") {
+      return false;
+    }
+
+    const style = current.ownerDocument.defaultView?.getComputedStyle(current);
+    if (
+      style?.display === "none" ||
+      style?.visibility === "hidden" ||
+      style?.visibility === "collapse" ||
+      style?.contentVisibility === "hidden"
+    ) {
+      return false;
+    }
+
+    current = current.parentElement;
   }
 
-  const style = element.ownerDocument.defaultView?.getComputedStyle(element);
-  return style?.display !== "none" && style?.visibility !== "hidden";
+  return true;
 }
 
 function findSubtitle(root: Element): string {

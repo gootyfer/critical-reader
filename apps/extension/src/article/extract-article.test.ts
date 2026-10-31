@@ -44,7 +44,8 @@ describe("extractArticle", () => {
       <p aria-hidden="true">Oculto para accesibilidad.</p>
       <p style="display: none">Oculto con display.</p>
       <p style="visibility: hidden">Oculto con visibility.</p>
-      <p>Párrafo visible.</p>
+      <div style="display: none"><p>Oculto por un ancestro.</p></div>
+      <p>Párrafo <span hidden>secreto</span> visible.</p>
     `;
 
     expect(extractArticle(document)?.request).toEqual({
