@@ -64,9 +64,23 @@ export const FindingSchema = z.object({
   explanation: z.string().trim().min(1).max(500),
 });
 
-export const AnalyzeResponseSchema = z.object({
-  findings: z.array(FindingSchema).max(MAX_PARAGRAPHS),
-});
+export const AnalyzeResponseSchema = z
+  .object({
+    findings: z.array(FindingSchema).max(MAX_PARAGRAPHS),
+  })
+  .superRefine((response, context) => {
+    const paragraphIds = new Set(
+      response.findings.map(({ paragraphId }) => paragraphId),
+    );
+
+    if (paragraphIds.size !== response.findings.length) {
+      context.addIssue({
+        code: "custom",
+        message: "Solo puede existir un hallazgo por párrafo",
+        path: ["findings"],
+      });
+    }
+  });
 
 export type Paragraph = z.infer<typeof ParagraphSchema>;
 export type AnalyzeRequest = z.infer<typeof AnalyzeRequestSchema>;

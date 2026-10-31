@@ -194,13 +194,27 @@ describe("AnalyzeResponseSchema", () => {
   it("enforces the findings count boundary", () => {
     expect(
       AnalyzeResponseSchema.safeParse({
-        findings: Array.from({ length: MAX_PARAGRAPHS }, () => validFinding),
+        findings: Array.from({ length: MAX_PARAGRAPHS }, (_, index) => ({
+          ...validFinding,
+          paragraphId: `p${index}`,
+        })),
       }).success,
     ).toBe(true);
     expect(
       AnalyzeResponseSchema.safeParse({
-        findings: Array.from({ length: MAX_PARAGRAPHS + 1 }, () => validFinding),
+        findings: Array.from({ length: MAX_PARAGRAPHS + 1 }, (_, index) => ({
+          ...validFinding,
+          paragraphId: `p${index}`,
+        })),
       }).success,
     ).toBe(false);
+  });
+
+  it("rejects duplicate finding paragraph identifiers", () => {
+    const result = AnalyzeResponseSchema.safeParse({
+      findings: [validFinding, { ...validFinding, category: "racism_xenophobia" }],
+    });
+
+    expect(result.success).toBe(false);
   });
 });
