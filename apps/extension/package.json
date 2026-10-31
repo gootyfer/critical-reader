@@ -1,0 +1,22 @@
+{
+  "name": "@critical-reader/extension",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "build": "wxt build",
+    "test": "wxt prepare && vitest run",
+    "typecheck": "wxt prepare && tsc --noEmit"
+  },
+  "dependencies": {
+    "@critical-reader/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.0",
+    "jsdom": "30.1.3",
+    "typescript": "5.9.3",
+    "vitest": "4.0.4",
+    "wxt": "0.21.5"
+  }
+}

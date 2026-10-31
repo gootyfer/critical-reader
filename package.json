@@ -5,6 +5,8 @@
   "packageManager": "pnpm@12.16.1",
   "scripts": {
     "dev:api": "pnpm --filter @critical-reader/api dev",
+    "dev:extension": "pnpm --filter @critical-reader/extension dev",
+    "build:extension": "pnpm --filter @critical-reader/extension build",
     "start:api": "pnpm --filter @critical-reader/api start",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck"
