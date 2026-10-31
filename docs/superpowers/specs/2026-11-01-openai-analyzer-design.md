@@ -71,11 +71,11 @@ Si `ANALYZER=openai` y falta la clave o la configuración es inválida, el servi
 
 ### Selección del analizador
 
-Una factoría `createArticleAnalyzer(config, dependencies)` construye `FakeArticleAnalyzer` u `OpenAIArticleAnalyzer`. `buildServer` recibe el analizador y su nombre, de modo que `/health` informa `fake` u `openai` correctamente. La selección ocurre una vez al arrancar.
+Una factoría `createArticleAnalyzer(config, dependencies)` construye `FakeArticleAnalyzer` o un `ModelArticleAnalyzer` conectado al adaptador de proveedor configurado. `buildServer` recibe el analizador y su nombre, de modo que `/health` informa `fake` u `openai` correctamente. La selección ocurre una vez al arrancar.
 
 ### Adaptador OpenAI
 
-`OpenAIArticleAnalyzer` implementa `ArticleAnalyzer`. Recibe un puerto pequeño, `OpenAIResponsesClient`, en lugar de depender directamente del SDK; la implementación de ese puerto encapsula `responses.parse`. Así las pruebas verifican la petición exacta sin red y el SDK queda limitado a un archivo adaptador.
+`ModelArticleAnalyzer` implementa `ArticleAnalyzer`. Recibe un puerto neutral, `AnalysisModelClient`, en lugar de depender de OpenAI o de su SDK. `SdkOpenAIAnalysisClient` implementa ese puerto y encapsula `responses.parse`; un futuro adaptador OpenRouter implementará el mismo contrato sin modificar el analizador, el prompt, las rutas, la extensión ni los evals. Así las pruebas verifican la petición exacta sin red y cada SDK queda limitado a su propio adaptador.
 
 El adaptador transforma la salida estructurada a `AnalyzeResponse`, exige salida completa y valida de nuevo con `AnalyzeResponseSchema`. También exige:
 
@@ -114,6 +114,8 @@ Se añadirá un corpus versionado de 12 artículos pequeños:
 - 3 casos neutrales, críticos o ambiguos.
 
 Un comando manual `pnpm eval:openai` ejecuta los 12 casos con la configuración real, compara IDs esperados y muestra precisión, recall, falsos positivos, falsos negativos y latencia. No forma parte de `pnpm test` y nunca imprime la clave ni el artículo completo.
+
+El corpus y sus findings esperados se escribirán antes del prompt para evitar adaptar los casos a la implementación. La ejecución contra el modelo se hará al final, sin cambiar las expectativas para conseguir que pase.
 
 Criterio inicial de aceptación:
 

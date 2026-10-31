@@ -4,7 +4,7 @@
 
 **Goal:** Añadir un analizador real y opcional basado en `gpt-6-luna` que clasifique un artículo español completo en una petición estructurada, mida su precisión local y mantenga intacto el flujo `fake`.
 
-**Architecture:** La configuración selecciona `fake` u `openai` al arrancar. `OpenAIArticleAnalyzer` depende de un puerto pequeño y probado; un adaptador aislado traduce ese puerto al SDK oficial y Responses API. Las rutas solo conocen errores de dominio estables, mientras un runner separado ejecuta la evaluación real sin formar parte de la suite determinista.
+**Architecture:** La configuración selecciona `fake` u `openai` al arrancar. `ModelArticleAnalyzer` depende del puerto neutral `AnalysisModelClient`; el adaptador OpenAI traduce ese puerto al SDK oficial y Responses API, y un futuro adaptador OpenRouter podrá reemplazarlo sin tocar el dominio. Las rutas solo conocen errores estables, mientras un runner separado ejecuta la evaluación real sin formar parte de la suite determinista.
 
 **Tech Stack:** Node.js 24, TypeScript 5.9, OpenAI SDK 7.47.0, Responses API, `gpt-6-luna`, Zod 4.1, Vitest 4.
 
@@ -20,15 +20,16 @@
 - `OPENAI_BASE_URL` es configurable y usa `https://api.openai.com/v1` por defecto; el código no promete ZDR ni residencia europea.
 - Máximo un finding por párrafo y solo IDs presentes en la petición.
 - Casos citados, atribuidos, críticos, neutrales o ambiguos producen `findings: []`.
+- El corpus y sus findings esperados se escriben y congelan antes de implementar el prompt; después solo se ajusta la rúbrica, nunca las expectativas para obtener verde.
 - Todas las funciones de comportamiento nuevas siguen RED → GREEN → REFACTOR antes del commit.
 
 ## Review Focus
 
-- Texto del artículo que intenta cambiar las instrucciones: se mantiene como datos JSON y el caso adversarial no produce findings; cubierto en Tasks 2 y 4.
-- Respuesta estructurada con ID desconocido o duplicado: se rechaza como respuesta inválida; cubierto en Tasks 1 y 2.
-- Rechazo, salida incompleta, timeout o fallo de red: no hay retry y la ruta devuelve un error genérico 502/504; cubierto en Tasks 2 y 3.
-- `ANALYZER=openai` sin clave, con URL inválida o timeout inválido: el proceso falla antes de escuchar y no imprime secretos; cubierto en Tasks 1 y 3.
-- Evaluación que no alcanza precisión objetivo: sale con código no cero y solo permite ajustar la rúbrica antes de repetir el mismo corpus; cubierto en Tasks 4 y 5.
+- Texto del artículo que intenta cambiar las instrucciones: se mantiene como datos JSON y el caso adversarial no produce findings; cubierto en Tasks 2, 3 y 5.
+- Respuesta estructurada con ID desconocido o duplicado: se rechaza como respuesta inválida; cubierto en Tasks 1 y 3.
+- Rechazo, salida incompleta, timeout o fallo de red: no hay retry y la ruta devuelve un error genérico 502/504; cubierto en Tasks 3 y 4.
+- `ANALYZER=openai` sin clave, con URL inválida o timeout inválido: el proceso falla antes de escuchar y no imprime secretos; cubierto en Tasks 1 y 4.
+- Evaluación que no alcanza precisión objetivo: sale con código no cero y solo permite ajustar la rúbrica antes de repetir el mismo corpus; cubierto en Tasks 5 y 6.
 
 ---
 
@@ -101,15 +102,52 @@ git add packages/contracts apps/api/src/config.ts apps/api/src/config.test.ts ap
 git commit -m "feat: validate analyzer configuration"
 ```
 
-### Task 2: Puerto, prompt y analizador OpenAI con Structured Outputs
+### Task 2: Corpus de evaluación congelado antes del prompt
+
+**Files:**
+- Create: `apps/api/src/evals/openai-cases.test.ts`
+- Create: `apps/api/src/evals/openai-cases.ts`
+
+**Interfaces:**
+- Consumes: `AnalyzeRequest`, `AnalyzeResponse`.
+- Produces: `EvaluationCase = { id: string; request: AnalyzeRequest; expected: AnalyzeResponse }`; `OPENAI_EVALUATION_CASES: readonly EvaluationCase[]`.
+
+- [ ] **Step 1: Escribir la prueba fallida de composición del corpus.**
+
+Comprobar literalmente que hay 12 IDs únicos: seis positivos —dos por categoría—, tres citas/atribuciones y tres casos neutral/crítico/ambiguo. Validar todos los requests y expected outputs con los schemas compartidos y exigir un caso negativo cuyo texto contenga una instrucción adversarial.
+
+- [ ] **Step 2: Ejecutar RED del corpus.**
+
+Run: `pnpm --filter @critical-reader/api test -- src/evals/openai-cases.test.ts`
+
+Expected: FAIL porque `OPENAI_EVALUATION_CASES` todavía no existe.
+
+- [ ] **Step 3: Escribir y congelar los 12 casos.**
+
+Incluir estereotipo, deshumanización, exclusión y otro encuadre claro entre los positivos. Las citas, atribuciones, crítica, neutralidad, ambigüedad e instrucción adversarial tienen `findings: []`. Cada expected output usa únicamente IDs presentes en su request.
+
+- [ ] **Step 4: Ejecutar GREEN del corpus.**
+
+Run: `pnpm --filter @critical-reader/api test -- src/evals/openai-cases.test.ts && pnpm --filter @critical-reader/api typecheck`
+
+Expected: PASS sin dependencias ni llamadas de red.
+
+- [ ] **Step 5: Commit.**
+
+```bash
+git add apps/api/src/evals/openai-cases.ts apps/api/src/evals/openai-cases.test.ts
+git commit -m "test: define model evaluation corpus"
+```
+
+### Task 3: Puerto, prompt y analizador de modelo con adaptador OpenAI
 
 **Files:**
 - Create: `apps/api/src/analyzers/analyzer-error.ts`
-- Create: `apps/api/src/analyzers/openai/openai-analysis-client.ts`
-- Create: `apps/api/src/analyzers/openai/prompt.test.ts`
-- Create: `apps/api/src/analyzers/openai/prompt.ts`
-- Create: `apps/api/src/analyzers/openai/openai-analyzer.test.ts`
-- Create: `apps/api/src/analyzers/openai/openai-analyzer.ts`
+- Create: `apps/api/src/analyzers/model/analysis-model-client.ts`
+- Create: `apps/api/src/analyzers/model/prompt.test.ts`
+- Create: `apps/api/src/analyzers/model/prompt.ts`
+- Create: `apps/api/src/analyzers/model/model-analyzer.test.ts`
+- Create: `apps/api/src/analyzers/model/model-analyzer.ts`
 - Create: `apps/api/src/analyzers/openai/sdk-openai-client.test.ts`
 - Create: `apps/api/src/analyzers/openai/sdk-openai-client.ts`
 - Modify: `apps/api/package.json`
@@ -117,7 +155,7 @@ git commit -m "feat: validate analyzer configuration"
 
 **Interfaces:**
 - Consumes: `AnalyzeRequest`, `AnalyzeResponseSchema`, `OpenAIAnalyzerConfig`.
-- Produces: `ArticleAnalyzerError` con códigos `timeout | provider_error | refused | incomplete | invalid_response`; `buildAnalysisMessages(input)`; `OpenAIAnalysisClient.analyze(request): Promise<OpenAIClientResult>`; `OpenAIArticleAnalyzer implements ArticleAnalyzer`; `SdkOpenAIAnalysisClient`.
+- Produces: `ArticleAnalyzerError` con códigos `timeout | provider_error | refused | incomplete | invalid_response`; `buildAnalysisMessages(input)`; `AnalysisModelClient.analyze(request): Promise<AnalysisModelResult>`; `ModelArticleAnalyzer implements ArticleAnalyzer`; `SdkOpenAIAnalysisClient implements AnalysisModelClient`.
 
 - [ ] **Step 1: Instalar el SDK fijado.**
 
@@ -138,7 +176,7 @@ La mutación que debe fallar es concatenar el artículo dentro de las instruccio
 
 - [ ] **Step 3: Ejecutar RED del prompt.**
 
-Run: `pnpm --filter @critical-reader/api test -- src/analyzers/openai/prompt.test.ts`
+Run: `pnpm --filter @critical-reader/api test -- src/analyzers/model/prompt.test.ts`
 
 Expected: FAIL porque `buildAnalysisMessages` todavía no existe.
 
@@ -148,11 +186,11 @@ Exportar `ANALYSIS_PROMPT_VERSION = "2026-11-01"` y `buildAnalysisMessages(input
 
 - [ ] **Step 5: Ejecutar GREEN del prompt.**
 
-Run: `pnpm --filter @critical-reader/api test -- src/analyzers/openai/prompt.test.ts`
+Run: `pnpm --filter @critical-reader/api test -- src/analyzers/model/prompt.test.ts`
 
 Expected: PASS.
 
-- [ ] **Step 6: Escribir pruebas fallidas de `OpenAIArticleAnalyzer`.**
+- [ ] **Step 6: Escribir pruebas fallidas de `ModelArticleAnalyzer`.**
 
 Usar un puerto falso específico y cubrir:
 
@@ -165,17 +203,17 @@ Usar un puerto falso específico y cubrir:
 
 - [ ] **Step 7: Ejecutar RED del analizador.**
 
-Run: `pnpm --filter @critical-reader/api test -- src/analyzers/openai/openai-analyzer.test.ts`
+Run: `pnpm --filter @critical-reader/api test -- src/analyzers/model/model-analyzer.test.ts`
 
 Expected: FAIL porque las interfaces y el analizador todavía no existen.
 
 - [ ] **Step 8: Implementar dominio y puerto mínimos.**
 
-Definir la unión de resultado del puerto (`completed | refused | incomplete`) y `OpenAIArticleAnalyzer.analyze(input)`. Validar `completed.output` con `AnalyzeResponseSchema` y el conjunto de IDs del input.
+Definir la unión neutral `AnalysisModelResult` (`completed | refused | incomplete`) y `ModelArticleAnalyzer.analyze(input)`. Validar `completed.output` con `AnalyzeResponseSchema` y el conjunto de IDs del input. Este archivo no importa el SDK de OpenAI ni contiene nombres de proveedor.
 
 - [ ] **Step 9: Ejecutar GREEN del analizador.**
 
-Run: `pnpm --filter @critical-reader/api test -- src/analyzers/openai/openai-analyzer.test.ts`
+Run: `pnpm --filter @critical-reader/api test -- src/analyzers/model/model-analyzer.test.ts`
 
 Expected: PASS.
 
@@ -198,7 +236,7 @@ Expected: FAIL porque `SdkOpenAIAnalysisClient` todavía no existe.
 
 Encapsular `new OpenAI({ apiKey, baseURL })`, `responses.parse`, `zodTextFormat(AnalyzeResponseSchema, "article_analysis")`, `store: false`, `reasoning: { effort: "low" }`, `max_output_tokens: 4000` y señal de timeout. Mapear estado/refusal/incomplete y errores del SDK al puerto sin copiar mensajes remotos.
 
-- [ ] **Step 13: Ejecutar GREEN del adaptador y verificar Task 2.**
+- [ ] **Step 13: Ejecutar GREEN del adaptador y verificar Task 3.**
 
 Run: `pnpm --filter @critical-reader/api test && pnpm --filter @critical-reader/api typecheck`
 
@@ -211,7 +249,7 @@ git add apps/api/package.json apps/api/src/analyzers pnpm-lock.yaml
 git commit -m "feat: analyze articles with OpenAI"
 ```
 
-### Task 3: Factoría, arranque local y errores HTTP estables
+### Task 4: Factoría, arranque local y errores HTTP estables
 
 **Files:**
 - Create: `apps/api/src/analyzers/create-analyzer.test.ts`
@@ -223,7 +261,7 @@ git commit -m "feat: analyze articles with OpenAI"
 - Modify: `apps/api/src/routes/analyze.test.ts`
 
 **Interfaces:**
-- Consumes: `ApiConfig`, `OpenAIArticleAnalyzer`, `SdkOpenAIAnalysisClient`, `ArticleAnalyzerError`.
+- Consumes: `ApiConfig`, `ModelArticleAnalyzer`, `AnalysisModelClient`, `SdkOpenAIAnalysisClient`, `ArticleAnalyzerError`.
 - Produces: `ConfiguredAnalyzer = { name: "fake" | "openai"; analyzer: ArticleAnalyzer }`; `createArticleAnalyzer(config, dependencies?)`; `buildServer({ analyzer, analyzerName, logger })`.
 
 - [ ] **Step 1: Escribir pruebas fallidas de la factoría.**
@@ -272,7 +310,7 @@ Responder `{ error: "analysis_timeout" }` con 504 y `{ error: "analysis_provider
 
 En `index.ts`, resolver `apps/api/.env` desde `import.meta.url` (no desde el directorio de ejecución) y cargarlo con `process.loadEnvFile` si existe. Después ejecutar `loadApiConfig`, crear el analizador y solo entonces arrancar. Un `ConfigurationError` termina con código 1 y texto genérico antes de `listen`.
 
-- [ ] **Step 9: Verificar Task 3.**
+- [ ] **Step 9: Verificar Task 4.**
 
 Run: `pnpm --filter @critical-reader/api test && pnpm --filter @critical-reader/api typecheck && pnpm test`
 
@@ -285,10 +323,9 @@ git add apps/api/src
 git commit -m "feat: select analyzer at API startup"
 ```
 
-### Task 4: Corpus y runner de evaluación reproducible
+### Task 5: Métricas y runner de evaluación reproducible
 
 **Files:**
-- Create: `apps/api/src/evals/openai-cases.ts`
 - Create: `apps/api/src/evals/metrics.test.ts`
 - Create: `apps/api/src/evals/metrics.ts`
 - Create: `apps/api/src/evals/run-openai-eval.ts`
@@ -296,8 +333,8 @@ git commit -m "feat: select analyzer at API startup"
 - Modify: `package.json`
 
 **Interfaces:**
-- Consumes: `OpenAIArticleAnalyzer`, `AnalyzeRequest`, casos esperados.
-- Produces: `EvaluationCase`; `calculateEvaluationMetrics(results)`; comando raíz `pnpm eval:openai` con salida agregada y exit code de aceptación.
+- Consumes: `ModelArticleAnalyzer`, `OPENAI_EVALUATION_CASES` de Task 2.
+- Produces: `calculateEvaluationMetrics(results)`; comando raíz `pnpm eval:openai` con salida agregada y exit code de aceptación.
 
 - [ ] **Step 1: Escribir pruebas fallidas de métricas.**
 
@@ -319,36 +356,32 @@ Run: `pnpm --filter @critical-reader/api test -- src/evals/metrics.test.ts`
 
 Expected: PASS.
 
-- [ ] **Step 5: Crear los 12 casos versionados.**
-
-Seis positivos: dos sexism, dos racism/xenophobia y dos homophobia/transphobia, con estereotipo, deshumanización, exclusión y otro encuadre claro. Seis negativos: tres citas/atribuciones y tres casos neutral, crítico, ambiguo; uno incluye una instrucción adversarial dentro del artículo. Cada caso define request y findings esperados.
-
-- [ ] **Step 6: Implementar el runner manual.**
+- [ ] **Step 5: Implementar el runner manual sobre el corpus congelado.**
 
 Exigir `ANALYZER=openai`; ejecutar secuencialmente para medir latencia; imprimir solo ID de caso, esperado/obtenido, métricas y tiempos; nunca texto completo ni credenciales. Timeout/error cuenta como fallo y salida no cero. Añadir scripts en API y raíz.
 
-- [ ] **Step 7: Verificar runner sin red.**
+- [ ] **Step 6: Verificar runner sin red.**
 
 Run: `pnpm --filter @critical-reader/api test && pnpm typecheck`
 
 Expected: PASS. No ejecutar todavía `eval:openai`.
 
-- [ ] **Step 8: Commit.**
+- [ ] **Step 7: Commit.**
 
 ```bash
-git add apps/api/src/evals apps/api/package.json package.json
+git add apps/api/src/evals/metrics.ts apps/api/src/evals/metrics.test.ts apps/api/src/evals/run-openai-eval.ts apps/api/package.json package.json
 git commit -m "test: add OpenAI analyzer evaluation"
 ```
 
-### Task 5: Documentación, evaluación real y smoke test de la alfa
+### Task 6: Documentación, evaluación real y smoke test de la alfa
 
 **Files:**
 - Modify: `README.md`
-- Modify if evaluation requires: `apps/api/src/analyzers/openai/prompt.ts`
-- Modify with regression coverage if prompt changes: `apps/api/src/analyzers/openai/prompt.test.ts`
+- Modify if evaluation requires: `apps/api/src/analyzers/model/prompt.ts`
+- Modify with regression coverage if prompt changes: `apps/api/src/analyzers/model/prompt.test.ts`
 
 **Interfaces:**
-- Consumes: configuración, runner y extensión de Tasks 1–4.
+- Consumes: configuración, corpus congelado, runner y extensión de Tasks 1–5.
 - Produces: instrucciones reproducibles y evidencia de aceptación local.
 
 - [ ] **Step 1: Documentar configuración segura.**
@@ -388,6 +421,6 @@ Expected: 0 fallos, 0 errores, build correcto y solo cambios esperados antes del
 - [ ] **Step 8: Commit.**
 
 ```bash
-git add README.md apps/api/src/analyzers/openai/prompt.ts apps/api/src/analyzers/openai/prompt.test.ts
+git add README.md apps/api/src/analyzers/model/prompt.ts apps/api/src/analyzers/model/prompt.test.ts
 git commit -m "docs: explain OpenAI-powered local prototype"
 ```
