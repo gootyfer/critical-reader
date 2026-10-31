@@ -1,0 +1,12 @@
+{
+  "name": "critical-reader",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@12.16.1",
+  "scripts": {
+    "dev:api": "pnpm --filter @critical-reader/api dev",
+    "start:api": "pnpm --filter @critical-reader/api start",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
+  }
+}

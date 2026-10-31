@@ -1,0 +1,13 @@
+node_modules/
+.pnpm-store/
+dist/
+coverage/
+.env*
+!.env.example
+.DS_Store
+.wxt/
+.output/
+*.log
+
+# Este proyecto usa pnpm como único gestor de paquetes.
+package-lock.json
