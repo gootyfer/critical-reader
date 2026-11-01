@@ -6,6 +6,10 @@ import type {
 } from "@critical-reader/contracts";
 
 import type { ArticleAnalyzer } from "../analyzers/article-analyzer.js";
+import {
+  ArticleAnalyzerError,
+  type ArticleAnalyzerErrorCode,
+} from "../analyzers/analyzer-error.js";
 import { createContentHash } from "../cache/content-hash.js";
 import { buildServer } from "../server.js";
 
@@ -133,5 +137,53 @@ describe("POST /analyze", () => {
       error: "Internal Server Error",
       statusCode: 500,
     });
+  });
+
+  it.each([
+    ["timeout", 504, "analysis_timeout"],
+    ["provider_error", 502, "analysis_provider_error"],
+    ["refused", 502, "analysis_provider_error"],
+    ["incomplete", 502, "analysis_provider_error"],
+    ["invalid_response", 502, "analysis_provider_error"],
+  ] as const)(
+    "maps %s failures to a stable response",
+    async (code, statusCode, responseError) => {
+      const app = await serverWith({
+        async analyze() {
+          const error = new ArticleAnalyzerError(
+            code as ArticleAnalyzerErrorCode,
+          );
+          Object.assign(error, { remoteMessage: "secret-provider-detail" });
+          throw error;
+        },
+      });
+
+      const response = await app.inject({
+        method: "POST",
+        url: "/analyze",
+        payload: validRequest,
+      });
+
+      expect(response.statusCode).toBe(statusCode);
+      expect(response.json()).toEqual({ error: responseError });
+      expect(response.body).not.toContain("secret-provider-detail");
+    },
+  );
+
+  it("keeps unknown programming errors as generic 500 responses", async () => {
+    const app = await serverWith({
+      async analyze() {
+        throw new Error("secret-programming-detail");
+      },
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/analyze",
+      payload: validRequest,
+    });
+
+    expect(response.statusCode).toBe(500);
+    expect(response.body).not.toContain("secret-programming-detail");
   });
 });

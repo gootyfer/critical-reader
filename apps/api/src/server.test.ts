@@ -19,6 +19,18 @@ describe("local API", () => {
     expect(response.json()).toEqual({ status: "ok", analyzer: "fake" });
   });
 
+  it("reports the configured analyzer name", async () => {
+    const app = await buildServer({
+      analyzerName: "openai",
+      analyzer: { async analyze() { return { findings: [] }; } },
+    });
+    servers.push(app);
+
+    const response = await app.inject({ method: "GET", url: "/health" });
+
+    expect(response.json()).toEqual({ status: "ok", analyzer: "openai" });
+  });
+
   it("returns only the clearly matched paragraph", async () => {
     const app = await buildServer();
     servers.push(app);
