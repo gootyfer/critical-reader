@@ -4,8 +4,6 @@ import {
   type AnalyzeResponse,
 } from "@critical-reader/contracts";
 
-const ANALYZE_ENDPOINT = "http://127.0.0.1:8787/analyze";
-
 export type AnalysisRequestErrorCode =
   | "network_error"
   | "http_error"
@@ -25,13 +23,17 @@ export class AnalysisRequestError extends Error {
 export async function requestAnalysis(
   fetchFn: typeof fetch,
   input: AnalyzeRequest,
+  config: { endpoint: string; clientVersion: string },
 ): Promise<AnalyzeResponse> {
   let response: Response;
 
   try {
-    response = await fetchFn(ANALYZE_ENDPOINT, {
+    response = await fetchFn(config.endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Critical-Reader-Version": config.clientVersion,
+      },
       body: JSON.stringify(input),
     });
   } catch {

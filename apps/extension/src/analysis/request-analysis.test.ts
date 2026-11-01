@@ -25,8 +25,13 @@ const validResponse = {
   ],
 };
 
+const requestConfig = {
+  endpoint: "https://critical-reader-api.vercel.app/analyze",
+  clientVersion: "0.2.0",
+};
+
 describe("requestAnalysis", () => {
-  it("posts the article to the local API and returns a validated response", async () => {
+  it("posts the article to the configured API with its client version", async () => {
     const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
       new Response(JSON.stringify(validResponse), {
         status: 200,
@@ -34,11 +39,14 @@ describe("requestAnalysis", () => {
       }),
     );
 
-    await expect(requestAnalysis(fetchFn, input)).resolves.toEqual(validResponse);
+    await expect(requestAnalysis(fetchFn, input, requestConfig)).resolves.toEqual(validResponse);
     expect(fetchFn).toHaveBeenCalledOnce();
-    expect(fetchFn).toHaveBeenCalledWith("http://127.0.0.1:8787/analyze", {
+    expect(fetchFn).toHaveBeenCalledWith(requestConfig.endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Critical-Reader-Version": "0.2.0",
+      },
       body: JSON.stringify(input),
     });
   });
@@ -48,7 +56,7 @@ describe("requestAnalysis", () => {
       .fn<typeof fetch>()
       .mockResolvedValue(new Response("sensitive upstream detail", { status: 500 }));
 
-    await expect(requestAnalysis(fetchFn, input)).rejects.toMatchObject({
+    await expect(requestAnalysis(fetchFn, input, requestConfig)).rejects.toMatchObject({
       name: "AnalysisRequestError",
       code: "http_error",
       message: "The analysis service returned an error",
@@ -60,7 +68,7 @@ describe("requestAnalysis", () => {
       .fn<typeof fetch>()
       .mockRejectedValue(new Error("connection details"));
 
-    await expect(requestAnalysis(fetchFn, input)).rejects.toMatchObject({
+    await expect(requestAnalysis(fetchFn, input, requestConfig)).rejects.toMatchObject({
       name: "AnalysisRequestError",
       code: "network_error",
       message: "The analysis service is unavailable",
@@ -84,7 +92,7 @@ describe("requestAnalysis", () => {
       ),
     );
 
-    const error = await requestAnalysis(fetchFn, input).catch(
+    const error = await requestAnalysis(fetchFn, input, requestConfig).catch(
       (reason: unknown) => reason,
     );
 
@@ -100,7 +108,7 @@ describe("requestAnalysis", () => {
       .fn<typeof fetch>()
       .mockResolvedValue(new Response("not json", { status: 200 }));
 
-    await expect(requestAnalysis(fetchFn, input)).rejects.toMatchObject({
+    await expect(requestAnalysis(fetchFn, input, requestConfig)).rejects.toMatchObject({
       name: "AnalysisRequestError",
       code: "invalid_response",
     });
