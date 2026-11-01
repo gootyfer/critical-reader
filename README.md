@@ -75,6 +75,14 @@ El dominio depende de un puerto neutral de proveedor. Una futura integración co
 
 Si `ANALYZER=openai` no tiene una clave o contiene configuración inválida, la API falla al arrancar; no vuelve silenciosamente al analizador falso.
 
+Las variables ya exportadas por la terminal tienen prioridad sobre `apps/api/.env`. Si una petición devuelve `credit_balance_exhausted` aunque el proyecto tenga saldo, comprueba si existe una clave global antigua sin mostrar su valor:
+
+```bash
+node -e 'console.log(process.env.OPENAI_API_KEY ? "global key present" : "no global key")'
+```
+
+Para la sesión actual, elimínala con `unset OPENAI_API_KEY`. Si vuelve al abrir una terminal, retira la línea `export OPENAI_API_KEY=...` de `~/.zprofile`, `~/.zshrc` o el archivo de inicio donde esté definida. Conserva la clave de este proyecto únicamente en `apps/api/.env`.
+
 ## Evaluación del modelo
 
 El corpus sintético versionado contiene seis positivos claros y seis negativos —citas, crítica, neutralidad, ambigüedad e inyección de instrucciones—. No forma parte de `pnpm test` y solo se ejecuta manualmente con la configuración OpenAI activa:
