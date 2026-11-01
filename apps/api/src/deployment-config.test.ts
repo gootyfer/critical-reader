@@ -8,12 +8,12 @@ type VercelConfig = {
 };
 
 describe("Vercel deployment configuration", () => {
-  it("pins the API to Frankfurt with enough time for the analyzer", async () => {
+  it("pins the auto-detected Fastify API to Frankfurt", async () => {
     const contents = await readFile(new URL("../vercel.json", import.meta.url), "utf8");
     const config = JSON.parse(contents) as VercelConfig;
 
     expect(config.regions).toEqual(["fra1"]);
-    expect(config.functions?.["src/index.ts"]?.maxDuration).toBe(45);
+    expect(config.functions).toBeUndefined();
   });
 
   it("does not embed credentials or secret values", async () => {
