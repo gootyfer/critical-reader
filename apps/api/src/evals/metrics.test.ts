@@ -78,6 +78,23 @@ describe("calculateEvaluationMetrics", () => {
     });
   });
 
+  it("rejects more than one missed positive when the corpus grows", () => {
+    const results: EvaluationResult[] = [
+      ...fiveOfSixDetected.slice(0, 5),
+      { expected: response(finding("p6")), actual: response(finding("p6")) },
+      { expected: response(finding("p7")), actual: response(finding("p7")) },
+      { expected: response(finding("p8")), actual: response() },
+      { expected: response(finding("p9")), actual: response() },
+      { expected: response(), actual: response() },
+    ];
+
+    expect(calculateEvaluationMetrics(results)).toMatchObject({
+      positiveCasesDetected: 7,
+      falseNegatives: 2,
+      accepted: false,
+    });
+  });
+
   it("counts provider failures as failed and unacceptable cases", () => {
     const results = fiveOfSixDetected.map((result) => ({ ...result }));
     results[0] = { expected: response(finding("p1")), actual: null };

@@ -85,13 +85,13 @@ Para la sesión actual, elimínala con `unset OPENAI_API_KEY`. Si vuelve al abri
 
 ## Evaluación del modelo
 
-El corpus sintético versionado contiene seis positivos claros y seis negativos —citas, crítica, neutralidad, ambigüedad e inyección de instrucciones—. No forma parte de `pnpm test` y solo se ejecuta manualmente con la configuración OpenAI activa:
+El corpus híbrido versionado contiene doce casos sintéticos —seis positivos claros y seis negativos— y cuatro fragmentos breves procedentes de artículos reales, con su medio y URL de origen. Los casos reales cubren sexismo, xenofobia, homofobia y un control negativo de discurso atribuido. Las webs no se descargan durante la evaluación. El eval no forma parte de `pnpm test` y solo se ejecuta manualmente con la configuración OpenAI activa:
 
 ```bash
 pnpm eval:openai
 ```
 
-La aceptación inicial exige cero falsos positivos en los seis negativos, detectar al menos cinco de los seis positivos y completar los doce casos dentro del timeout. El comando solo imprime identificadores, conteos, métricas y latencias; no muestra el texto de los artículos ni la clave.
+La aceptación exige cero falsos positivos en los siete negativos, detectar al menos ocho de los nueve positivos y completar los dieciséis casos dentro del timeout. El comando solo imprime identificadores, conteos, métricas y latencias; no muestra el texto de los artículos ni la clave.
 
 ## Prueba manual del flujo completo
 

@@ -29,6 +29,7 @@ export const calculateEvaluationMetrics = (
   let falsePositives = 0;
   let falseNegatives = 0;
   let positiveCasesDetected = 0;
+  let positiveCases = 0;
   let negativeCasesWithFalsePositives = 0;
   let failedCases = 0;
 
@@ -37,6 +38,7 @@ export const calculateEvaluationMetrics = (
     const actual = new Set((result.actual?.findings ?? []).map(findingKey));
 
     if (result.actual === null) failedCases += 1;
+    if (expected.size > 0) positiveCases += 1;
 
     const matched = [...expected].filter((key) => actual.has(key)).length;
     truePositives += matched;
@@ -57,7 +59,7 @@ export const calculateEvaluationMetrics = (
   const accepted =
     failedCases === 0 &&
     falsePositives === 0 &&
-    positiveCasesDetected >= 5;
+    positiveCasesDetected >= Math.max(1, positiveCases - 1);
 
   return {
     truePositives,

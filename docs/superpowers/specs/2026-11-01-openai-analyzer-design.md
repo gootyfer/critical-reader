@@ -107,20 +107,22 @@ No habrá reintento automático en esta versión: evita duplicar coste y latenci
 
 ## Evaluación
 
-Se añadirá un corpus versionado de 12 artículos pequeños:
+Se mantendrá un corpus híbrido versionado de 16 casos pequeños:
 
 - 6 positivos claros, cubriendo las tres categorías y varios mecanismos.
 - 3 citas o discursos atribuidos con lenguaje discriminatorio.
 - 3 casos neutrales, críticos o ambiguos.
+- 3 fragmentos positivos de artículos reales, uno por categoría.
+- 1 fragmento real negativo que atribuye lenguaje homófobo a una encuesta.
 
-Un comando manual `pnpm eval:openai` ejecuta los 12 casos con la configuración real, compara IDs esperados y muestra precisión, recall, falsos positivos, falsos negativos y latencia. No forma parte de `pnpm test` y nunca imprime la clave ni el artículo completo.
+Los fragmentos reales se congelan junto a su medio y URL; el eval no depende de descargar las webs. Un comando manual `pnpm eval:openai` ejecuta los 16 casos con la configuración real, compara IDs esperados y muestra precisión, recall, falsos positivos, falsos negativos y latencia. No forma parte de `pnpm test` y nunca imprime la clave ni el artículo completo.
 
 El corpus y sus findings esperados se escribirán antes del prompt para evitar adaptar los casos a la implementación. La ejecución contra el modelo se hará al final, sin cambiar las expectativas para conseguir que pase.
 
 Criterio inicial de aceptación:
 
-- Cero falsos positivos en los 6 artículos negativos.
-- Al menos 5 de 6 casos positivos detectados.
+- Cero falsos positivos en los 7 casos negativos.
+- Al menos 8 de 9 casos positivos detectados.
 - Todos los resultados cumplen el contrato.
 - Ninguna petición supera el timeout configurado durante la ejecución de aceptación.
 

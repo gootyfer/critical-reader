@@ -29,7 +29,7 @@ describe("runEvaluation", () => {
 
     expect(result.exitCode).toBe(0);
     expect(result.metrics.accepted).toBe(true);
-    expect(analyze).toHaveBeenCalledTimes(12);
+    expect(analyze).toHaveBeenCalledTimes(16);
     expect(maximumActive).toBe(1);
     expect(lines.join("\n")).toContain("positive_sexism_stereotype");
     expect(lines.join("\n")).not.toContain(

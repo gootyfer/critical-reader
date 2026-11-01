@@ -7,9 +7,9 @@ import { describe, expect, it } from "vitest";
 import { OPENAI_EVALUATION_CASES } from "./openai-cases.js";
 
 describe("OPENAI_EVALUATION_CASES", () => {
-  it("freezes twelve uniquely identified, contract-valid cases", () => {
-    expect(OPENAI_EVALUATION_CASES).toHaveLength(12);
-    expect(new Set(OPENAI_EVALUATION_CASES.map(({ id }) => id)).size).toBe(12);
+  it("freezes sixteen uniquely identified, contract-valid cases", () => {
+    expect(OPENAI_EVALUATION_CASES).toHaveLength(16);
+    expect(new Set(OPENAI_EVALUATION_CASES.map(({ id }) => id)).size).toBe(16);
 
     for (const evaluationCase of OPENAI_EVALUATION_CASES) {
       expect(AnalyzeRequestSchema.safeParse(evaluationCase.request).success).toBe(
@@ -21,8 +21,64 @@ describe("OPENAI_EVALUATION_CASES", () => {
     }
   });
 
-  it("contains two positive cases for each category", () => {
-    const categories = OPENAI_EVALUATION_CASES.flatMap(({ expected }) =>
+  it("combines twelve synthetic cases with four traceable real articles", () => {
+    const realCases = OPENAI_EVALUATION_CASES.filter(
+      ({ source }) => source?.kind === "real",
+    );
+
+    expect(realCases.map(({ id, source }) => ({ id, source }))).toEqual([
+      {
+        id: "real_elespanol_sexism_biological_generalization",
+        source: {
+          kind: "real",
+          outlet: "El Español",
+          url: "https://www.elespanol.com/opinion/columnas/20220116/sexo-politica-mujeres-conservadoras-hombres-progresistas/642565759_13.html",
+        },
+      },
+      {
+        id: "real_elespanol_xenophobia_national_belonging",
+        source: {
+          kind: "real",
+          outlet: "El Español",
+          url: "https://www.elespanol.com/opinion/columnas/20260501/espana-cacho-tierra/1003744228645_12.html",
+        },
+      },
+      {
+        id: "real_okdiario_homophobia_diversity_framing",
+        source: {
+          kind: "real",
+          outlet: "OKDIARIO",
+          url: "https://okdiario.com/opinion/que-orgullo-hablamos-2549470/amp",
+        },
+      },
+      {
+        id: "real_larazon_negative_attributed_survey",
+        source: {
+          kind: "real",
+          outlet: "La Razón",
+          url: "https://www.larazon.es/comunidad-valenciana/20200624/ki7fu2kmfff7laq3iv5ivyruhy.html",
+        },
+      },
+    ]);
+
+    expect(
+      OPENAI_EVALUATION_CASES.filter(({ source }) => source === undefined),
+    ).toHaveLength(12);
+
+    expect(realCases.map(({ expected }) => expected.findings[0]?.category)).toEqual(
+      [
+        "sexism",
+        "racism_xenophobia",
+        "homophobia_transphobia",
+        undefined,
+      ],
+    );
+  });
+
+  it("keeps two synthetic positive cases for each category", () => {
+    const categories = OPENAI_EVALUATION_CASES.filter(
+      ({ source }) => source === undefined,
+    ).flatMap(({ expected }) =>
       expected.findings.map(({ category }) => category),
     );
 
@@ -36,9 +92,10 @@ describe("OPENAI_EVALUATION_CASES", () => {
     ]);
   });
 
-  it("contains three attributed and three contextual negative cases", () => {
+  it("keeps three attributed and three contextual synthetic negatives", () => {
     const negativeIds = OPENAI_EVALUATION_CASES.filter(
-      ({ expected }) => expected.findings.length === 0,
+      ({ expected, source }) =>
+        source === undefined && expected.findings.length === 0,
     ).map(({ id }) => id);
 
     expect(negativeIds).toEqual([
