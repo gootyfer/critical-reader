@@ -4,6 +4,7 @@ import type { ArticleAnalyzer } from "./analyzers/article-analyzer.js";
 import { FakeArticleAnalyzer } from "./analyzers/fake-analyzer.js";
 import { registerAnalyzeRoute } from "./routes/analyze.js";
 import { registerFixtureRoutes } from "./routes/fixtures.js";
+import { registerPublicPageRoutes } from "./routes/public-pages.js";
 import { loadServerPolicy, type ServerPolicy } from "./server-policy.js";
 
 interface LoggerStream {
@@ -30,6 +31,7 @@ export async function buildServer(options: BuildServerOptions = {}) {
     status: "ok",
     analyzer: options.analyzerName ?? "fake",
   }));
+  await registerPublicPageRoutes(app);
   await registerAnalyzeRoute(app, analyzer, policy);
   if (policy.fixturesEnabled) await registerFixtureRoutes(app);
 
