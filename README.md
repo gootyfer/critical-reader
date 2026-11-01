@@ -50,7 +50,40 @@ Después de recompilar, pulsa **Actualizar** en la tarjeta de la extensión dent
 - `GET /fixtures/quoted-speech`
 - `GET /fixtures/neutral`
 
-El primer hito usa exclusivamente un analizador falso y no necesita claves ni servicios externos.
+Por defecto se usa el analizador falso y no se necesitan claves ni servicios externos. Para activar el prototipo real, copia el ejemplo de configuración:
+
+```bash
+cp apps/api/.env.example apps/api/.env
+```
+
+Edita únicamente `apps/api/.env`:
+
+```dotenv
+ANALYZER=openai
+OPENAI_API_KEY=tu_clave_local
+OPENAI_MODEL=gpt-6-luna
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_REASONING_EFFORT=low
+OPENAI_TIMEOUT_MS=30000
+```
+
+`apps/api/.env` está ignorado por Git. La clave se queda en la API local y nunca se incluye en la extensión, sus respuestas o el corpus de evaluación. Con `ANALYZER=openai`, el título, subtítulo y texto completo del artículo se envían a OpenAI en una sola petición; no uses esta configuración con contenido que no debas compartir con ese proveedor.
+
+La petición usa `store: false`, pero esto no equivale por sí solo a Zero Data Retention. El endpoint inicial es global. `OPENAI_BASE_URL` permite configurar `https://eu.api.openai.com/v1` más adelante, cuando el proyecto y el modelo sean elegibles para los controles y residencia de datos europeos correspondientes.
+
+El dominio depende de un puerto neutral de proveedor. Una futura integración con OpenRouter podrá sustituir el adaptador OpenAI sin modificar la extensión, las rutas, el prompt ni los evals.
+
+Si `ANALYZER=openai` no tiene una clave o contiene configuración inválida, la API falla al arrancar; no vuelve silenciosamente al analizador falso.
+
+## Evaluación del modelo
+
+El corpus sintético versionado contiene seis positivos claros y seis negativos —citas, crítica, neutralidad, ambigüedad e inyección de instrucciones—. No forma parte de `pnpm test` y solo se ejecuta manualmente con la configuración OpenAI activa:
+
+```bash
+pnpm eval:openai
+```
+
+La aceptación inicial exige cero falsos positivos en los seis negativos, detectar al menos cinco de los seis positivos y completar los doce casos dentro del timeout. El comando solo imprime identificadores, conteos, métricas y latencias; no muestra el texto de los artículos ni la clave.
 
 ## Prueba manual del flujo completo
 
