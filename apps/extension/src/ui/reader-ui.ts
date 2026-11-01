@@ -72,15 +72,33 @@ export function createReaderUi(document: Document): ReaderUi {
         z-index: 2147483647;
       }
       #status {
+        align-items: flex-start;
         background: #fffdf4;
         border: 1px solid #e4c441;
         border-radius: 8px;
         box-shadow: 0 4px 18px rgba(0, 0, 0, .18);
+        display: flex;
+        gap: 10px;
         max-width: min(360px, calc(100vw - 32px));
-        padding: 10px 14px;
+        padding: 10px 10px 10px 14px;
         right: 16px;
         top: 16px;
       }
+      #status-message { flex: 1; }
+      #status-close {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        border-radius: 4px;
+        color: #5f5200;
+        cursor: pointer;
+        flex: 0 0 auto;
+        font: 20px/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        margin: -2px 0 0;
+        padding: 2px 4px;
+      }
+      #status-close:hover { background: rgba(95, 82, 0, .1); }
+      #status-close:focus-visible { outline: 2px solid #7a6800; outline-offset: 1px; }
       #critical-reader-popover {
         background: white;
         border: 1px solid #c8a900;
@@ -94,12 +112,17 @@ export function createReaderUi(document: Document): ReaderUi {
       #critical-reader-popover p { margin: 6px 0 0; }
       #mechanism { color: #5f5200; font-size: 12px; }
     </style>
-    <div id="status" role="status" aria-live="polite" hidden></div>
+    <div id="status" hidden>
+      <span id="status-message" role="status" aria-live="polite"></span>
+      <button id="status-close" type="button" aria-label="Cerrar aviso">×</button>
+    </div>
     <div id="critical-reader-popover" role="tooltip" hidden></div>
   `;
   document.documentElement.append(host);
 
   const status = shadow.querySelector<HTMLElement>("#status")!;
+  const statusMessage = shadow.querySelector<HTMLElement>("#status-message")!;
+  const statusClose = shadow.querySelector<HTMLButtonElement>("#status-close")!;
   const popover = shadow.querySelector<HTMLElement>(
     "#critical-reader-popover",
   )!;
@@ -107,6 +130,15 @@ export function createReaderUi(document: Document): ReaderUi {
   let activeElement: HTMLParagraphElement | null = null;
   let pinnedElement: HTMLParagraphElement | null = null;
   let destroyed = false;
+
+  const showStatus = (message: string) => {
+    statusMessage.textContent = message;
+    status.hidden = false;
+  };
+
+  statusClose.addEventListener("click", () => {
+    status.hidden = true;
+  });
 
   const hidePopover = () => {
     popover.hidden = true;
@@ -181,8 +213,7 @@ export function createReaderUi(document: Document): ReaderUi {
         return;
       }
 
-      status.textContent = "Analizando este artículo…";
-      status.hidden = false;
+      showStatus("Analizando este artículo…");
     },
 
     showError(message) {
@@ -190,8 +221,7 @@ export function createReaderUi(document: Document): ReaderUi {
         return;
       }
 
-      status.textContent = message;
-      status.hidden = false;
+      showStatus(message);
     },
 
     renderFindings(extracted, response) {
@@ -202,8 +232,7 @@ export function createReaderUi(document: Document): ReaderUi {
       clearHighlights();
 
       if (response.findings.length === 0) {
-        status.textContent = "No se detectaron expresiones claras.";
-        status.hidden = false;
+        showStatus("No se detectaron expresiones claras.");
         return;
       }
 
@@ -297,8 +326,7 @@ export function createReaderUi(document: Document): ReaderUi {
       }
 
       if (highlightRecords.length === 0) {
-        status.textContent = "No se encontraron los párrafos señalados.";
-        status.hidden = false;
+        showStatus("No se encontraron los párrafos señalados.");
       }
     },
 

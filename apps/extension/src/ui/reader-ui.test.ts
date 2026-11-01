@@ -159,16 +159,44 @@ describe("createReaderUi", () => {
       "[data-critical-reader-host]",
     )!;
     const status = host.shadowRoot?.querySelector<HTMLElement>("#status")!;
+    const statusMessage = host.shadowRoot?.querySelector<HTMLElement>(
+      "#status-message",
+    )!;
 
     ui.showLoading();
-    expect(status.textContent).toBe("Analizando este artículo…");
+    expect(statusMessage.textContent).toBe("Analizando este artículo…");
     expect(status.hidden).toBe(false);
 
     ui.showError("No se pudo conectar con el servidor local.");
-    expect(status.textContent).toBe("No se pudo conectar con el servidor local.");
+    expect(statusMessage.textContent).toBe(
+      "No se pudo conectar con el servidor local.",
+    );
 
     ui.renderFindings(extractedArticle(), { findings: [] });
-    expect(status.textContent).toBe("No se detectaron expresiones claras.");
+    expect(statusMessage.textContent).toBe(
+      "No se detectaron expresiones claras.",
+    );
+  });
+
+  it("lets users dismiss status notices and shows future notices again", () => {
+    const ui = createReaderUi(document);
+    const host = document.querySelector<HTMLElement>(
+      "[data-critical-reader-host]",
+    )!;
+    const status = host.shadowRoot?.querySelector<HTMLElement>("#status")!;
+    const closeButton = host.shadowRoot?.querySelector<HTMLButtonElement>(
+      "button[aria-label='Cerrar aviso']",
+    );
+
+    ui.renderFindings(extractedArticle(), { findings: [] });
+    expect(closeButton).not.toBeNull();
+
+    closeButton?.click();
+    expect(status.hidden).toBe(true);
+
+    ui.showError("Nuevo aviso");
+    expect(status.hidden).toBe(false);
+    expect(status.textContent).toContain("Nuevo aviso");
   });
 
   it("removes its host and restores paragraph attributes on destroy", () => {
