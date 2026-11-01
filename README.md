@@ -23,10 +23,10 @@ pnpm dev:api
 
 El servidor queda disponible en `http://127.0.0.1:8787`.
 
-Compila la extensión en una segunda terminal:
+Compila la extensión local en una segunda terminal:
 
 ```bash
-pnpm build:extension
+pnpm --filter @critical-reader/extension exec wxt build --mode development
 ```
 
 La extensión desempaquetada queda en `apps/extension/.output/chrome-mv3`.
@@ -103,10 +103,24 @@ Con la API y la extensión cargadas, abre cada fixture y pulsa el icono:
 
 La extensión usa `activeTab`: solo lee la pestaña actual tras el clic. El único acceso de red permanente declarado es `http://127.0.0.1:8787/*`.
 
+## Beta alojada
+
+La API puede desplegarse en Vercel y la extensión puede compilarse contra su dominio HTTPS sin cambiar el contrato entre ambas. La configuración operativa, las variables separadas para Preview y Production, el rate limit y el procedimiento de rollback están en [la guía de despliegue de la beta](docs/deployment/vercel-beta.md).
+
+Para generar la extensión de producción:
+
+```bash
+WXT_API_BASE_URL=https://critical-reader-api.example.vercel.app pnpm --filter @critical-reader/extension build
+```
+
+Sustituye el dominio de ejemplo por el asignado al proyecto. Un build de producción sin `WXT_API_BASE_URL` falla deliberadamente para impedir que se distribuya una extensión que apunte por accidente a localhost. Para desarrollo usa siempre el comando con `--mode development` mostrado al principio.
+
+La beta envía a la API el título, subtítulo y texto completo del artículo y la API los remite a OpenAI para analizarlos. No ofrece Zero Data Retention; este tratamiento se explica antes del primer uso y en las páginas públicas de privacidad y términos.
+
 ## Comprobaciones
 
 ```bash
 pnpm typecheck
 pnpm test
-pnpm build:extension
+pnpm --filter @critical-reader/extension exec wxt build --mode development
 ```
