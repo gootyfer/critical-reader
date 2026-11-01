@@ -8,6 +8,7 @@
     "dev:extension": "pnpm --filter @critical-reader/extension dev",
     "build:extension": "pnpm --filter @critical-reader/extension build",
     "start:api": "pnpm --filter @critical-reader/api start",
+    "eval:openai": "pnpm --filter @critical-reader/api eval:openai",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck"
   }
