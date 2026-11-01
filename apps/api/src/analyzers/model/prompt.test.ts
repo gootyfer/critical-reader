@@ -40,6 +40,15 @@ describe("buildAnalysisMessages", () => {
   });
 
   it("publishes a stable prompt version", () => {
-    expect(ANALYSIS_PROMPT_VERSION).toBe("2026-11-01");
+    expect(ANALYSIS_PROMPT_VERSION).toBe("2026-11-02");
+  });
+
+  it("requires identifying the owner of a proposition before flagging it", () => {
+    const { instructions } = buildAnalysisMessages(input);
+
+    expect(instructions).toContain("Identifica primero quién sostiene");
+    expect(instructions).toContain("aunque no haya comillas");
+    expect(instructions).toContain("adopta, respalda o afirma directamente");
+    expect(instructions).toContain("persona, partido político, organización, encuesta, documento, fuente u otro tercero");
   });
 });

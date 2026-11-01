@@ -7,9 +7,9 @@ import { describe, expect, it } from "vitest";
 import { OPENAI_EVALUATION_CASES } from "./openai-cases.js";
 
 describe("OPENAI_EVALUATION_CASES", () => {
-  it("freezes sixteen uniquely identified, contract-valid cases", () => {
-    expect(OPENAI_EVALUATION_CASES).toHaveLength(16);
-    expect(new Set(OPENAI_EVALUATION_CASES.map(({ id }) => id)).size).toBe(16);
+  it("freezes twenty-one uniquely identified, contract-valid cases", () => {
+    expect(OPENAI_EVALUATION_CASES).toHaveLength(21);
+    expect(new Set(OPENAI_EVALUATION_CASES.map(({ id }) => id)).size).toBe(21);
 
     for (const evaluationCase of OPENAI_EVALUATION_CASES) {
       expect(AnalyzeRequestSchema.safeParse(evaluationCase.request).success).toBe(
@@ -21,7 +21,7 @@ describe("OPENAI_EVALUATION_CASES", () => {
     }
   });
 
-  it("combines twelve synthetic cases with four traceable real articles", () => {
+  it("combines thirteen synthetic cases with eight traceable real articles", () => {
     const realCases = OPENAI_EVALUATION_CASES.filter(
       ({ source }) => source?.kind === "real",
     );
@@ -59,17 +59,53 @@ describe("OPENAI_EVALUATION_CASES", () => {
           url: "https://www.larazon.es/comunidad-valenciana/20200624/ki7fu2kmfff7laq3iv5ivyruhy.html",
         },
       },
+      {
+        id: "real_eldiario_negative_attributed_vox_subsidies",
+        source: {
+          kind: "real",
+          outlet: "elDiario.es",
+          url: "https://www.eldiario.es/aragon/sociedad/gobierno-central-eleva-ayudas-programas-sociales-aragon-vox-plantea-retirar-fondos-ong_1_13626729.html",
+        },
+      },
+      {
+        id: "real_elpais_negative_judicial_context",
+        source: {
+          kind: "real",
+          outlet: "El País",
+          url: "https://elpais.com/espana/2026-10-28/temor-a-la-tribu-maltrato-homosexual-obligaciones-militares-la-justicia-rechaza-45-solicitudes-de-proteccion-urgente.html",
+        },
+      },
+      {
+        id: "real_elespanol_negative_critical_feminism",
+        source: {
+          kind: "real",
+          outlet: "El Español",
+          url: "https://www.elespanol.com/valencia/opinion/20261030/madre-feministas/1003744440295_13.html",
+        },
+      },
+      {
+        id: "real_eldiario_negative_critical_racism",
+        source: {
+          kind: "real",
+          outlet: "elDiario.es",
+          url: "https://www.eldiario.es/aragon/el-prismatico/machismo-fronteras-racismo-responsables_132_13615402.html",
+        },
+      },
     ]);
 
     expect(
       OPENAI_EVALUATION_CASES.filter(({ source }) => source === undefined),
-    ).toHaveLength(12);
+    ).toHaveLength(13);
 
     expect(realCases.map(({ expected }) => expected.findings[0]?.category)).toEqual(
       [
         "sexism",
         "racism_xenophobia",
         "homophobia_transphobia",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
         undefined,
       ],
     );
@@ -92,7 +128,7 @@ describe("OPENAI_EVALUATION_CASES", () => {
     ]);
   });
 
-  it("keeps three attributed and three contextual synthetic negatives", () => {
+  it("keeps four attributed and three contextual synthetic negatives", () => {
     const negativeIds = OPENAI_EVALUATION_CASES.filter(
       ({ expected, source }) =>
         source === undefined && expected.findings.length === 0,
@@ -102,10 +138,23 @@ describe("OPENAI_EVALUATION_CASES", () => {
       "negative_quote_sexism",
       "negative_quote_racism",
       "negative_quote_homophobia",
+      "negative_indirect_attribution",
       "negative_critical_context",
       "negative_neutral_context",
       "negative_ambiguous_injection",
     ]);
+  });
+
+  it("freezes the reported Vox subsidies paragraph as a negative attribution", () => {
+    const evaluationCase = OPENAI_EVALUATION_CASES.find(
+      ({ id }) => id === "real_eldiario_negative_attributed_vox_subsidies",
+    );
+
+    expect(evaluationCase?.request.paragraphs).toContainEqual({
+      id: "p1",
+      text: "La posición de Vox se ha traducido ya en una modificación concreta de las subvenciones autonómicas. El pasado 2 de octubre, el departamento de Nolasco publicó una convocatoria que eliminaba la línea específica de apoyo a personas LGTBI y sus familias, dotada con 161.000 euros en 2025, y concentraba los 516.000 euros disponibles en proyectos dirigidos a personas con discapacidad.",
+    });
+    expect(evaluationCase?.expected).toEqual({ findings: [] });
   });
 
   it("keeps an adversarial instruction inside a negative article", () => {

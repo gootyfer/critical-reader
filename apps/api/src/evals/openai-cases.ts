@@ -220,6 +220,25 @@ export const OPENAI_EVALUATION_CASES: readonly EvaluationCase[] = [
     expected: { findings: [] },
   },
   {
+    id: "negative_indirect_attribution",
+    request: {
+      title: "Debate municipal sobre igualdad",
+      subtitle: "La crónica resume la posición de un partido",
+      language: "es",
+      paragraphs: [
+        {
+          id: "p0",
+          text: "El pleno municipal debatió la financiación de los programas de igualdad.",
+        },
+        {
+          id: "p1",
+          text: "El partido sostuvo que las parejas homosexuales no deberían recibir el mismo reconocimiento jurídico y anunció que votaría contra la propuesta.",
+        },
+      ],
+    },
+    expected: { findings: [] },
+  },
+  {
     id: "negative_critical_context",
     request: {
       title: "Romper estereotipos",
@@ -402,6 +421,111 @@ export const OPENAI_EVALUATION_CASES: readonly EvaluationCase[] = [
         {
           id: "p1",
           text: "Un 8,32% manifiesta una \"homofobia afectiva\": no me considero homófobo pero no me gusta ver parejas homosexuales o me dan asco.",
+        },
+      ],
+    },
+    expected: { findings: [] },
+  },
+  {
+    id: "real_eldiario_negative_attributed_vox_subsidies",
+    source: {
+      kind: "real",
+      outlet: "elDiario.es",
+      url: "https://www.eldiario.es/aragon/sociedad/gobierno-central-eleva-ayudas-programas-sociales-aragon-vox-plantea-retirar-fondos-ong_1_13626729.html",
+    },
+    request: {
+      title:
+        "El Gobierno central eleva las ayudas a programas sociales en Aragón mientras Vox plantea retirar fondos a varias ONG",
+      subtitle:
+        "Noticia sobre subvenciones sociales y las decisiones del Gobierno de Aragón",
+      language: "es",
+      paragraphs: [
+        {
+          id: "p0",
+          text: "Estas ayudas contrastan con las posiciones expresadas por Vox. En julio de 2025, el diputado David Arranz manifestó su «oposición rotunda» a otra convocatoria autonómica de un millón de euros destinada a favorecer la integración de personas de origen extranjero.",
+        },
+        {
+          id: "p1",
+          text: "La posición de Vox se ha traducido ya en una modificación concreta de las subvenciones autonómicas. El pasado 2 de octubre, el departamento de Nolasco publicó una convocatoria que eliminaba la línea específica de apoyo a personas LGTBI y sus familias, dotada con 161.000 euros en 2025, y concentraba los 516.000 euros disponibles en proyectos dirigidos a personas con discapacidad.",
+        },
+        {
+          id: "p2",
+          text: "La decisión fue defendida en las Cortes por David Arranz, quien aseguró que «no vamos a financiar el lobby LGTBIQ», mientras Nolasco rechazó destinar dinero público a asociaciones que considera próximas a la izquierda.",
+        },
+      ],
+    },
+    expected: { findings: [] },
+  },
+  {
+    id: "real_elpais_negative_judicial_context",
+    source: {
+      kind: "real",
+      outlet: "El País",
+      url: "https://elpais.com/espana/2026-10-28/temor-a-la-tribu-maltrato-homosexual-obligaciones-militares-la-justicia-rechaza-45-solicitudes-de-proteccion-urgente.html",
+    },
+    request: {
+      title:
+        "Temor a la tribu, maltrato homosexual, obligaciones militares: la justicia rechaza 45 solicitudes de protección urgente",
+      subtitle:
+        "La Audiencia Nacional comienza a denegar peticiones de protección de migrantes",
+      language: "es",
+      paragraphs: [
+        {
+          id: "p0",
+          text: "Temor a la tribu, maltrato homosexual, obligaciones militares, miedo a la familia, disputas por una herencia e incluso amenazas en TikTok. La justicia ha comenzado a resolver ya los recursos con todo tipo de argumentos que los migrantes que están en Ceuta han desplegado ante la Audiencia Nacional.",
+        },
+        {
+          id: "p1",
+          text: "Esta protección internacional comprende el derecho de asilo y la protección subsidiaria, y se suele otorgar a personas que sufren persecución en su país por motivos como raza, religión, nacionalidad, ideología, género u orientación sexual.",
+        },
+      ],
+    },
+    expected: { findings: [] },
+  },
+  {
+    id: "real_elespanol_negative_critical_feminism",
+    source: {
+      kind: "real",
+      outlet: "El Español",
+      url: "https://www.elespanol.com/valencia/opinion/20261030/madre-feministas/1003744440295_13.html",
+    },
+    request: {
+      title: "La madre de todos los feministas",
+      subtitle: "Columna crítica sobre excusas frente a la discriminación",
+      language: "es",
+      paragraphs: [
+        {
+          id: "p0",
+          text: "Este mensaje no es nuevo. Se parece mucho a otros que hemos oído, respecto de cualquier otra causa de discriminación. ¿Cómo voy a ser homófobo, si tengo un amigo gay? O ¿Cómo voy a ser racista, si tengo varios compañeros de trabajo negros?",
+        },
+        {
+          id: "p1",
+          text: "Pues, por sorprendente que parezca a quien compra ese mensaje, se puede no ser feminista aunque uno se haya criado con mujeres del mismo modo que se puede ser homófobo aun teniendo un amigo gay y racista a pesar de compartir trabajo con varias personas de piel negra.",
+        },
+      ],
+    },
+    expected: { findings: [] },
+  },
+  {
+    id: "real_eldiario_negative_critical_racism",
+    source: {
+      kind: "real",
+      outlet: "elDiario.es",
+      url: "https://www.eldiario.es/aragon/el-prismatico/machismo-fronteras-racismo-responsables_132_13615402.html",
+    },
+    request: {
+      title: "Machismo sin fronteras. Racismo con responsables",
+      subtitle:
+        "El feminismo exige protección frente a la violencia sin justificar políticas racistas",
+      language: "es",
+      paragraphs: [
+        {
+          id: "p0",
+          text: "El feminismo no pregunta de dónde viene el agresor para decidir si defiende a la víctima. Exige justicia, reparación y protección frente a todas las violencias machistas. Y no necesita justificar políticas racistas para hacerlo.",
+        },
+        {
+          id: "p1",
+          text: "No vamos a aceptar ahora lecciones de quienes pretenden utilizar nuestra lucha para dividir a las mujeres según su origen o según el origen de los agresores. La seguridad no se construye convirtiendo a las personas migrantes en sospechosas por el mero hecho de serlo.",
         },
       ],
     },
