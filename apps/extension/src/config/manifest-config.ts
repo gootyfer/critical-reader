@@ -6,6 +6,13 @@ export function createManifestConfig(_config: ExtensionConfig) {
     throw new Error("Invalid extension configuration");
   }
 
+  const icons = {
+    16: "icon/16.png",
+    32: "icon/32.png",
+    48: "icon/48.png",
+    128: "icon/128.png",
+  };
+
   return {
     name: "Critical Reader BETA",
     description:
@@ -13,8 +20,10 @@ export function createManifestConfig(_config: ExtensionConfig) {
     version: "0.2.0",
     permissions: ["activeTab", "scripting", "storage"],
     host_permissions: [`${origin}/*`],
+    icons,
     action: {
       default_title: "Analizar esta página",
+      default_icon: icons,
     },
   };
 }

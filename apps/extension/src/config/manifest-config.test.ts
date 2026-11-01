@@ -17,7 +17,21 @@ describe("createManifestConfig", () => {
       version: "0.2.0",
       permissions: ["activeTab", "scripting", "storage"],
       host_permissions: ["https://critical-reader-api.vercel.app/*"],
-      action: { default_title: "Analizar esta página" },
+      icons: {
+        16: "icon/16.png",
+        32: "icon/32.png",
+        48: "icon/48.png",
+        128: "icon/128.png",
+      },
+      action: {
+        default_title: "Analizar esta página",
+        default_icon: {
+          16: "icon/16.png",
+          32: "icon/32.png",
+          48: "icon/48.png",
+          128: "icon/128.png",
+        },
+      },
     });
   });
 
@@ -35,5 +49,10 @@ describe("createManifestConfig", () => {
     expect(manifest.host_permissions).toEqual([
       "https://critical-reader-api.vercel.app/*",
     ]);
+    expect(manifest.permissions).toEqual(["activeTab", "scripting", "storage"]);
+    expect(JSON.stringify(manifest)).not.toContain("<all_urls>");
+    expect(JSON.stringify(manifest)).not.toContain("api.openai.com");
+    expect(manifest).not.toHaveProperty("content_security_policy");
+    expect(manifest).not.toHaveProperty("externally_connectable");
   });
 });

@@ -9,7 +9,10 @@
     "build:extension": "pnpm --filter @critical-reader/extension build",
     "start:api": "pnpm --filter @critical-reader/api start",
     "eval:openai": "pnpm --filter @critical-reader/api eval:openai",
-    "test": "pnpm -r test",
+    "test": "pnpm -r test && node --test scripts/*.test.mjs",
+    "render:extension-icons": "node scripts/render-extension-icons.mjs",
+    "zip:extension": "pnpm --filter @critical-reader/extension exec wxt zip",
+    "verify:extension-archive": "node scripts/verify-extension-archive.mjs",
     "typecheck": "pnpm -r typecheck"
   }
 }

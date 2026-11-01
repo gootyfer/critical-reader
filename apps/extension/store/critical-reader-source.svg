@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title description">
+  <title id="title">Critical Reader</title>
+  <desc id="description">Un rotulador amarillo sobre un fondo azul oscuro.</desc>
+  <rect x="16" y="16" width="96" height="96" rx="23" fill="#17243d"/>
+  <path d="M31 88h66" fill="none" stroke="#ffd84d" stroke-linecap="round" stroke-width="12" opacity=".9"/>
+  <g transform="rotate(-42 64 62)">
+    <rect x="53" y="27" width="22" height="64" rx="7" fill="#f8fafc"/>
+    <path d="M53 72h22v19a7 7 0 0 1-7 7h-8a7 7 0 0 1-7-7z" fill="#ffd84d"/>
+    <path d="M57 98h14l-7 10z" fill="#f5b82e"/>
+    <rect x="58" y="34" width="12" height="28" rx="6" fill="#c8d2e4"/>
+  </g>
+</svg>
