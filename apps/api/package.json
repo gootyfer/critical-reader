@@ -11,15 +11,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@critical-reader/contracts": "workspace:*",
     "fastify": "5.6.1",
     "openai": "7.47.0",
     "zod": "4.1.12"
-  },
-  "dependenciesMeta": {
-    "@critical-reader/contracts": {
-      "injected": true
-    }
   },
   "devDependencies": {
     "@types/node": "24.10.0",

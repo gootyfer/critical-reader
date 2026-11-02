@@ -1,7 +1,7 @@
 import type {
   AnalyzeRequest,
   AnalyzeResponse,
-} from "@critical-reader/contracts";
+} from "../contracts.js";
 
 export interface EvaluationCase {
   id: string;

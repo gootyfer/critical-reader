@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import type { AnalyzeRequest } from "@critical-reader/contracts";
+import type { AnalyzeRequest } from "../contracts.js";
 
 export function normalizeText(text: string): string {
   return text.normalize("NFC").replace(/\s+/gu, " ").trim();

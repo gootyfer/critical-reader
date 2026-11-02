@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type {
   AnalyzeRequest,
   AnalyzeResponse,
-} from "@critical-reader/contracts";
+} from "../contracts.js";
 
 import type { ArticleAnalyzer } from "../analyzers/article-analyzer.js";
 import {

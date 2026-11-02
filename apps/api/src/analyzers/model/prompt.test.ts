@@ -1,4 +1,4 @@
-import type { AnalyzeRequest } from "@critical-reader/contracts";
+import type { AnalyzeRequest } from "../../contracts.js";
 import { describe, expect, it } from "vitest";
 
 import {

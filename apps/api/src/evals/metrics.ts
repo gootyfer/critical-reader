@@ -1,4 +1,4 @@
-import type { AnalyzeResponse } from "@critical-reader/contracts";
+import type { AnalyzeResponse } from "../contracts.js";
 
 export interface EvaluationResult {
   expected: AnalyzeResponse;

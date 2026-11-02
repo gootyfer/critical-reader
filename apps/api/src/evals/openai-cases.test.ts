@@ -1,7 +1,7 @@
 import {
   AnalyzeRequestSchema,
   AnalyzeResponseSchema,
-} from "@critical-reader/contracts";
+} from "../contracts.js";
 import { describe, expect, it } from "vitest";
 
 import { OPENAI_EVALUATION_CASES } from "./openai-cases.js";

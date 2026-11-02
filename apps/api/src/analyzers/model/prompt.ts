@@ -1,4 +1,4 @@
-import type { AnalyzeRequest } from "@critical-reader/contracts";
+import type { AnalyzeRequest } from "../../contracts.js";
 
 export const ANALYSIS_PROMPT_VERSION = "2026-11-02";
 

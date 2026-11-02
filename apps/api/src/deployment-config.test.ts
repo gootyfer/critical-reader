@@ -23,27 +23,17 @@ describe("Vercel deployment configuration", () => {
     expect(contents).not.toMatch(/OPENAI_API_KEY|authorization|bearer|token/i);
   });
 
-  it("packages the workspace contracts inside the serverless function", async () => {
+  it("keeps the serverless runtime independent from workspace symlinks", async () => {
     const manifest = JSON.parse(
       await readFile(new URL("../package.json", import.meta.url), "utf8"),
     ) as {
+      dependencies?: Record<string, string>;
       dependenciesMeta?: Record<string, { injected?: boolean }>;
     };
-    const workspaceConfig = await readFile(
-      new URL("../../../pnpm-workspace.yaml", import.meta.url),
-      "utf8",
-    );
-    const lockfile = await readFile(
-      new URL("../../../pnpm-lock.yaml", import.meta.url),
-      "utf8",
-    );
 
-    expect(
-      manifest.dependenciesMeta?.["@critical-reader/contracts"]?.injected,
-    ).toBe(true);
-    expect(workspaceConfig).toMatch(/dedupeInjectedDeps:\s*false/u);
-    expect(lockfile).toMatch(
-      /apps\/api:[\s\S]*?dependenciesMeta:\s*\n\s+'@critical-reader\/contracts':\s*\n\s+injected: true/u,
+    expect(manifest.dependencies).not.toHaveProperty(
+      "@critical-reader/contracts",
     );
+    expect(manifest.dependenciesMeta).toBeUndefined();
   });
 });

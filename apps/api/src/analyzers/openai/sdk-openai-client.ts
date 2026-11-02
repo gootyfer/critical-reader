@@ -1,4 +1,4 @@
-import { AnalyzeResponseSchema } from "@critical-reader/contracts";
+import { AnalyzeResponseSchema } from "../../contracts.js";
 import OpenAI, {
   APIConnectionTimeoutError,
   APIUserAbortError,

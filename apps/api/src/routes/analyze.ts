@@ -1,7 +1,7 @@
 import {
   AnalyzeRequestSchema,
   AnalyzeResponseSchema,
-} from "@critical-reader/contracts";
+} from "../contracts.js";
 import type { FastifyInstance } from "fastify";
 
 import type { ArticleAnalyzer } from "../analyzers/article-analyzer.js";

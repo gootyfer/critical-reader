@@ -2,7 +2,7 @@ import {
   AnalyzeResponseSchema,
   type AnalyzeRequest,
   type Finding,
-} from "@critical-reader/contracts";
+} from "../contracts.js";
 
 import type { ArticleAnalyzer } from "./article-analyzer.js";
 
