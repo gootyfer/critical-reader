@@ -1,5 +1,6 @@
 import { AnalyzeResponseSchema } from "../../contracts.js";
-import OpenAI, {
+import {
+  OpenAI,
   APIConnectionTimeoutError,
   APIUserAbortError,
 } from "openai";
