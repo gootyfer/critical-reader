@@ -41,13 +41,13 @@ describe("Vercel deployment configuration", () => {
   it("exposes one explicit Vercel Fastify entrypoint", async () => {
     expect(existsSync(new URL("./server.ts", import.meta.url))).toBe(false);
     expect(existsSync(new URL("./app-server.ts", import.meta.url))).toBe(true);
-    expect(existsSync(new URL("./app.ts", import.meta.url))).toBe(true);
+    expect(existsSync(new URL("./app.ts", import.meta.url))).toBe(false);
 
     const entrypoint = await readFile(
-      new URL("./app.ts", import.meta.url),
+      new URL("./index.ts", import.meta.url),
       "utf8",
     );
     expect(entrypoint).toMatch(/from "fastify"/u);
-    expect(entrypoint).toMatch(/export default app/u);
+    expect(entrypoint).toMatch(/app\.listen/u);
   });
 });
