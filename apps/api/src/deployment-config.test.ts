@@ -22,4 +22,21 @@ describe("Vercel deployment configuration", () => {
     expect(contents).not.toMatch(/sk-[A-Za-z0-9_-]+/);
     expect(contents).not.toMatch(/OPENAI_API_KEY|authorization|bearer|token/i);
   });
+
+  it("packages the workspace contracts inside the serverless function", async () => {
+    const manifest = JSON.parse(
+      await readFile(new URL("../package.json", import.meta.url), "utf8"),
+    ) as {
+      dependenciesMeta?: Record<string, { injected?: boolean }>;
+    };
+    const workspaceConfig = await readFile(
+      new URL("../../../pnpm-workspace.yaml", import.meta.url),
+      "utf8",
+    );
+
+    expect(
+      manifest.dependenciesMeta?.["@critical-reader/contracts"]?.injected,
+    ).toBe(true);
+    expect(workspaceConfig).toMatch(/dedupeInjectedDeps:\s*false/u);
+  });
 });

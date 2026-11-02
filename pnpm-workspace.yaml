@@ -2,6 +2,8 @@ packages:
   - apps/*
   - packages/*
 
+dedupeInjectedDeps: false
+
 overrides:
   light-my-request: 6.6.0
 allowBuilds:

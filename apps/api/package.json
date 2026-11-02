@@ -16,6 +16,11 @@
     "openai": "7.47.0",
     "zod": "4.1.12"
   },
+  "dependenciesMeta": {
+    "@critical-reader/contracts": {
+      "injected": true
+    }
+  },
   "devDependencies": {
     "@types/node": "24.10.0",
     "tsx": "4.20.6",

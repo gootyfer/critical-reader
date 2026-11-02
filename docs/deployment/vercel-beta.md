@@ -26,6 +26,8 @@ Configura un presupuesto mensual de 10 USD y alertas al alcanzar 5 y 8 USD. Guar
 5. Selecciona Node.js 24. El repositorio fija pnpm `12.16.1` en el `packageManager` raíz; no sobrescribas esa versión con un Install Command personalizado.
 6. Deja que Vercel detecte Fastify a partir de `src/index.ts`. No configures un Output Directory estático.
 
+La API marca `@critical-reader/contracts` como dependencia workspace inyectada y desactiva su deduplicación. Esto hace que pnpm incluya una copia ejecutable dentro de la función en vez de dejar un symlink hacia fuera del bundle.
+
 `apps/api/vercel.json` fija la región `fra1`. No declares `src/index.ts` en la sección `functions`: Vercel detecta automáticamente la aplicación Fastify y un patrón manual impide la compilación. El timeout del proveedor se mantiene en 30 segundos, por debajo de la duración predeterminada de las Functions con Fluid Compute.
 
 ## 3. Variables por entorno
