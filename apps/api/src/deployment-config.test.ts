@@ -48,6 +48,7 @@ describe("Vercel deployment configuration", () => {
       "utf8",
     );
     expect(entrypoint).toMatch(/from "fastify"/u);
-    expect(entrypoint).toMatch(/app\.listen/u);
+    expect(entrypoint).toMatch(/void app\.listen/u);
+    expect(entrypoint).not.toMatch(/await app\.listen/u);
   });
 });
