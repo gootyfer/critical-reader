@@ -24,11 +24,11 @@ Configura un presupuesto mensual de 10 USD y alertas al alcanzar 5 y 8 USD. Guar
 3. Establece **Root Directory** en `apps/api`.
 4. Mantén activada **Include source files outside of the Root Directory** para que Vercel pueda leer la configuración del monorepo.
 5. Selecciona Node.js 24. El repositorio fija pnpm `12.16.1` en el `packageManager` raíz; no sobrescribas esa versión con un Install Command personalizado.
-6. Deja que Vercel detecte Fastify a partir de `src/index.ts`. No configures un Output Directory estático.
+6. Deja que Vercel detecte Fastify a partir de `src/app.ts`. No configures un Output Directory estático.
 
 La API conserva una copia local de los esquemas de contrato para que la función sea autocontenida. Una prueba exige que sea idéntica, byte por byte, al contrato canónico de `packages/contracts`; así evitamos symlinks externos que el adaptador Fastify de Vercel no incluye en el bundle.
 
-No crees módulos auxiliares llamados `src/app.ts` ni `src/server.ts`: Vercel también los considera entrypoints Fastify. El constructor interno vive en `src/app-server.ts` para que el único entrypoint detectado sea `src/index.ts`.
+`src/app.ts` es el entrypoint de Vercel: importa Fastify directamente y exporta la instancia configurada. No crees un módulo auxiliar llamado `src/server.ts`, porque Vercel también lo trataría como entrypoint. El constructor interno vive en `src/app-server.ts` y `src/index.ts` queda reservado para desarrollo local.
 
 `apps/api/vercel.json` fija la región `fra1`. No declares `src/index.ts` en la sección `functions`: Vercel detecta automáticamente la aplicación Fastify y un patrón manual impide la compilación. El timeout del proveedor se mantiene en 30 segundos, por debajo de la duración predeterminada de las Functions con Fluid Compute.
 

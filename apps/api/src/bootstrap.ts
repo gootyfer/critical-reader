@@ -1,6 +1,8 @@
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
+import type Fastify from "fastify";
+
 import { createArticleAnalyzer } from "./analyzers/create-analyzer.js";
 import { loadApiConfig } from "./config.js";
 import { buildServer } from "./app-server.js";
@@ -27,13 +29,16 @@ export const loadLocalEnv = (
 
 export const createConfiguredServer = async (
   env: NodeJS.ProcessEnv,
-  options: { logger?: boolean } = {},
+  options: { fastifyFactory?: typeof Fastify; logger?: boolean } = {},
 ) => {
   const configured = createArticleAnalyzer(loadApiConfig(env));
   return buildServer({
     analyzer: configured.analyzer,
     analyzerName: configured.name,
     policy: loadServerPolicy(env),
+    ...(options.fastifyFactory === undefined
+      ? {}
+      : { fastifyFactory: options.fastifyFactory }),
     ...(options.logger === undefined ? {} : { logger: options.logger }),
   });
 };

@@ -14,6 +14,7 @@ interface LoggerStream {
 export interface BuildServerOptions {
   analyzer?: ArticleAnalyzer;
   analyzerName?: "fake" | "openai";
+  fastifyFactory?: typeof Fastify;
   logger?: boolean;
   loggerStream?: LoggerStream;
   policy?: ServerPolicy;
@@ -24,7 +25,10 @@ export async function buildServer(options: BuildServerOptions = {}) {
   const logger = options.loggerStream
     ? { level: "info", stream: options.loggerStream }
     : (options.logger ?? false);
-  const app = Fastify({ logger, bodyLimit: policy.bodyLimitBytes });
+  const app = (options.fastifyFactory ?? Fastify)({
+    logger,
+    bodyLimit: policy.bodyLimitBytes,
+  });
   const analyzer = options.analyzer ?? new FakeArticleAnalyzer();
 
   app.get("/health", async () => ({
