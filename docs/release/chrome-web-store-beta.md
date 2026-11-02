@@ -2,6 +2,8 @@
 
 La primera subida es manual. No se guardan credenciales de Chrome Web Store ni se automatiza la publicación en este hito.
 
+El borrador **Critical Reader BETA** usa el ID estable `feklbnkcmcampfdlicejamjjbhncjfmo`. El paquete 0.2.0 se subió correctamente y permanece en estado borrador, sin envío a revisión.
+
 ## Antes de empaquetar
 
 1. Despliega la API y comprueba sus páginas públicas.

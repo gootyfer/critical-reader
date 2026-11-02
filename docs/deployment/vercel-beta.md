@@ -47,11 +47,11 @@ OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_REASONING_EFFORT=low
 OPENAI_TIMEOUT_MS=30000
 ANALYSIS_ENABLED=false
-ALLOWED_EXTENSION_ORIGINS=chrome-extension://<id-definitivo-de-chrome-web-store>
+ALLOWED_EXTENSION_ORIGINS=chrome-extension://feklbnkcmcampfdlicejamjjbhncjfmo
 CRITICAL_READER_CLIENT_VERSION=0.2.0
 ```
 
-El primer despliegue debe conservar `ANALYSIS_ENABLED=false`. Sustituye el origen de ejemplo por el ID definitivo asignado a la extensión antes de habilitar el análisis. La API rechaza otros orígenes y versiones de cliente.
+El primer despliegue debe conservar `ANALYSIS_ENABLED=false`. El origen anterior corresponde al ID estable asignado al borrador de **Critical Reader BETA**. La API rechaza otros orígenes y versiones de cliente.
 
 ### Preview
 
@@ -82,7 +82,7 @@ La protección se completa con el límite de cuerpo de 128 KiB, el origen exacto
 1. Despliega con `ANALYSIS_ENABLED=false`.
 2. Comprueba `/`, `/privacy`, `/terms` y `/health` en el dominio de producción.
 3. Crea el borrador de Chrome Web Store y obtén el ID definitivo de la extensión.
-4. Sustituye `ALLOWED_EXTENSION_ORIGINS` por `chrome-extension://<id-definitivo>` y vuelve a desplegar.
+4. Configura `ALLOWED_EXTENSION_ORIGINS=chrome-extension://feklbnkcmcampfdlicejamjjbhncjfmo` y vuelve a desplegar.
 5. Compila la extensión con el dominio HTTPS definitivo y verifica el flujo completo.
 6. Cambia `ANALYSIS_ENABLED=true` solo cuando las comprobaciones sean correctas.
 

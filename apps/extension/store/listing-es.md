@@ -1,5 +1,7 @@
 # Ficha de Chrome Web Store — Critical Reader BETA
 
+ID estable del borrador: `feklbnkcmcampfdlicejamjjbhncjfmo`.
+
 ## Datos básicos
 
 - Nombre: **Critical Reader BETA**
