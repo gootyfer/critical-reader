@@ -110,10 +110,10 @@ La API puede desplegarse en Vercel y la extensión puede compilarse contra su do
 Para generar la extensión de producción:
 
 ```bash
-WXT_API_BASE_URL=https://critical-reader-api.example.vercel.app pnpm --filter @critical-reader/extension build
+WXT_API_BASE_URL=https://critical-reader.vercel.app pnpm --filter @critical-reader/extension build
 ```
 
-Sustituye el dominio de ejemplo por el asignado al proyecto. Un build de producción sin `WXT_API_BASE_URL` falla deliberadamente para impedir que se distribuya una extensión que apunte por accidente a localhost. Para desarrollo usa siempre el comando con `--mode development` mostrado al principio.
+Un build de producción sin `WXT_API_BASE_URL` falla deliberadamente para impedir que se distribuya una extensión que apunte por accidente a localhost. Para desarrollo usa siempre el comando con `--mode development` mostrado al principio.
 
 La beta envía a la API el título, subtítulo y texto completo del artículo y la API los remite a OpenAI para analizarlos. No ofrece Zero Data Retention; este tratamiento se explica antes del primer uso y en las páginas públicas de privacidad y términos.
 

@@ -7,12 +7,12 @@ La primera subida es manual. No se guardan credenciales de Chrome Web Store ni s
 1. Despliega la API y comprueba sus páginas públicas.
 2. Crea un borrador llamado **Critical Reader BETA** en Chrome Web Store para obtener el ID estable.
 3. Configura ese ID como origen permitido de la API y conserva `ANALYSIS_ENABLED=false`.
-4. Sustituye los marcadores `[DOMINIO_VERCEL]` de `apps/extension/store/listing-es.md` por el dominio real.
+4. Confirma que `apps/extension/store/listing-es.md` usa el dominio estable de producción.
 5. Compila y verifica el ZIP con el mismo origen exacto:
 
 ```bash
-WXT_API_BASE_URL=https://critical-reader-api.example.vercel.app pnpm zip:extension
-WXT_API_BASE_URL=https://critical-reader-api.example.vercel.app pnpm verify:extension-archive
+WXT_API_BASE_URL=https://critical-reader.vercel.app pnpm zip:extension
+WXT_API_BASE_URL=https://critical-reader.vercel.app pnpm verify:extension-archive
 ```
 
 El verificador exige un dominio HTTPS `*.vercel.app` real y rechaza placeholders, localhost, claves, `.env`, mapas de fuentes, permisos comodín y archivos ajenos al bundle.
@@ -25,8 +25,8 @@ El verificador exige un dominio HTTPS `*.vercel.app` real y rechaza placeholders
 - Nombre y descripción: copiar desde `apps/extension/store/listing-es.md`.
 - Icono de tienda: `apps/extension/public/icon/128.png`.
 - Capturas: al menos una captura real de 1280 × 800 o 640 × 400 px. Se recomienda una con el resaltado y el detalle abierto y otra con el consentimiento.
-- Política de privacidad: `https://<dominio>/privacy`.
-- Página principal: `https://<dominio>/`.
+- Política de privacidad: `https://critical-reader.vercel.app/privacy`.
+- Página principal: `https://critical-reader.vercel.app/`.
 - Soporte: gootyfer@gmail.com.
 
 ## Propósito único
@@ -40,7 +40,7 @@ No describir la extensión como detector exhaustivo ni como sistema que califica
 - `activeTab`: permite acceder solo a la pestaña que el usuario decide analizar al pulsar el icono; no concede acceso permanente al historial.
 - `scripting`: inyecta el lector y los resaltados en esa pestaña después del clic.
 - `storage`: guarda localmente la versión del consentimiento aceptado; no guarda artículos ni resultados.
-- `https://<dominio-vercel>/*`: permite enviar la solicitud de análisis únicamente a la API de Critical Reader. No se solicita acceso directo a OpenAI.
+- `https://critical-reader.vercel.app/*`: permite enviar la solicitud de análisis únicamente a la API de Critical Reader. No se solicita acceso directo a OpenAI.
 
 No se usa código remoto. Todo el JavaScript ejecutado por la extensión está incluido en el ZIP.
 

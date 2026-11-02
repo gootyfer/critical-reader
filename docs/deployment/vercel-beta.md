@@ -8,7 +8,7 @@ Esta guía despliega únicamente la API. La extensión se publica por separado c
 - Proyecto separado: `critical-reader-api`.
 - Plan: Hobby, solo para una beta personal y no comercial.
 - Región de ejecución: Frankfurt (`fra1`).
-- Dominio: el `*.vercel.app` generado por Vercel.
+- Dominio estable: `https://critical-reader.vercel.app`.
 - El contenido analizado se envía a OpenAI. Esta beta no promete Zero Data Retention.
 
 ## 1. Proyecto de OpenAI aislado
@@ -28,7 +28,7 @@ Configura un presupuesto mensual de 10 USD y alertas al alcanzar 5 y 8 USD. Guar
 
 La API conserva una copia local de los esquemas de contrato para que la función sea autocontenida. Una prueba exige que sea idéntica, byte por byte, al contrato canónico de `packages/contracts`; así evitamos symlinks externos que el adaptador Fastify de Vercel no incluye en el bundle.
 
-`src/index.ts` es el único entrypoint: importa Fastify directamente y llama a `listen()`, el patrón que usa el adaptador oficial tanto en Vercel como en desarrollo local. No crees módulos auxiliares llamados `src/app.ts` o `src/server.ts`, porque Vercel también los trataría como entrypoints. El constructor interno vive en `src/app-server.ts`.
+`src/index.ts` es el único entrypoint: importa Fastify directamente y llama a `listen()` sin esperar su promesa, el patrón que necesita el adaptador de Vercel y que también funciona en desarrollo local. No crees módulos auxiliares llamados `src/app.ts` o `src/server.ts`, porque Vercel también los trataría como entrypoints. El constructor interno vive en `src/app-server.ts`.
 
 `apps/api/vercel.json` fija la región `fra1`. No declares `src/index.ts` en la sección `functions`: Vercel detecta automáticamente la aplicación Fastify y un patrón manual impide la compilación. El timeout del proveedor se mantiene en 30 segundos, por debajo de la duración predeterminada de las Functions con Fluid Compute.
 

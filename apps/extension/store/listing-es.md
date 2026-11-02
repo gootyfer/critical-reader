@@ -25,12 +25,10 @@ Los resultados se generan automáticamente y pueden contener errores, omisiones 
 
 Esta versión es una beta privada no listada, dirigida a un grupo pequeño de prueba. Puede estar temporalmente indisponible y aplica límites de uso para controlar abusos y costes.
 
-- Información: `https://[DOMINIO_VERCEL]/`
-- Privacidad: `https://[DOMINIO_VERCEL]/privacy`
-- Términos: `https://[DOMINIO_VERCEL]/terms`
+- Información: `https://critical-reader.vercel.app/`
+- Privacidad: `https://critical-reader.vercel.app/privacy`
+- Términos: `https://critical-reader.vercel.app/terms`
 - Soporte: gootyfer@gmail.com
-
-Sustituir `[DOMINIO_VERCEL]` por el dominio de producción antes de enviar la ficha a revisión.
 
 ## Recursos gráficos
 
