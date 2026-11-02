@@ -33,10 +33,17 @@ describe("Vercel deployment configuration", () => {
       new URL("../../../pnpm-workspace.yaml", import.meta.url),
       "utf8",
     );
+    const lockfile = await readFile(
+      new URL("../../../pnpm-lock.yaml", import.meta.url),
+      "utf8",
+    );
 
     expect(
       manifest.dependenciesMeta?.["@critical-reader/contracts"]?.injected,
     ).toBe(true);
     expect(workspaceConfig).toMatch(/dedupeInjectedDeps:\s*false/u);
+    expect(lockfile).toMatch(
+      /apps\/api:[\s\S]*?dependenciesMeta:\s*\n\s+'@critical-reader\/contracts':\s*\n\s+injected: true/u,
+    );
   });
 });

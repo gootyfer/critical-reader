@@ -173,7 +173,7 @@ importers:
     dependencies:
       '@critical-reader/contracts':
         specifier: workspace:*
-        version: link:../../packages/contracts
+        version: file:packages/contracts
       fastify:
         specifier: 5.6.1
         version: 5.6.1
@@ -183,6 +183,9 @@ importers:
       zod:
         specifier: 4.1.12
         version: 4.1.12
+    dependenciesMeta:
+      '@critical-reader/contracts':
+        injected: true
     devDependencies:
       '@types/node':
         specifier: 24.10.0
@@ -281,6 +284,9 @@ packages:
   '@bramus/specificity@2.4.3':
     resolution: {integrity: sha512-0GEz8qJWokkUVYQYRukmkSHIFNoBH8QTreeHrAFbvz1XFYc3Y+puhMs8PQ5x8GNugiC2l5jvDBXKLbBIByeSBw==}
     hasBin: true
+
+  '@critical-reader/contracts@file:packages/contracts':
+    resolution: {directory: packages/contracts, type: directory}
 
   '@csstools/color-helpers@6.1.2':
     resolution: {integrity: sha512-grhRy3OKmniaAEKXMjua5z/EODX0MSqBGjunw8+j/3HQjOnahs2AGhvEOIYVUWcU6ScApbhLhVrQTX8XqrMrow==}
@@ -1882,6 +1888,10 @@ snapshots:
   '@bramus/specificity@2.4.3':
     dependencies:
       css-tree: 3.2.1
+
+  '@critical-reader/contracts@file:packages/contracts':
+    dependencies:
+      zod: 4.1.12
 
   '@csstools/color-helpers@6.1.2': {}
 
