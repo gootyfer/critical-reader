@@ -13,7 +13,7 @@ import {
   type ArticleAnalyzerErrorCode,
 } from "../analyzers/analyzer-error.js";
 import { createContentHash } from "../cache/content-hash.js";
-import { buildServer } from "../server.js";
+import { buildServer } from "../app-server.js";
 import type { ServerPolicy } from "../server-policy.js";
 
 const servers: Awaited<ReturnType<typeof buildServer>>[] = [];

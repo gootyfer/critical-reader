@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 
 import { describe, expect, it } from "vitest";
@@ -35,5 +36,10 @@ describe("Vercel deployment configuration", () => {
       "@critical-reader/contracts",
     );
     expect(manifest.dependenciesMeta).toBeUndefined();
+  });
+
+  it("reserves Vercel's Fastify entrypoint filenames for the real entrypoint", () => {
+    expect(existsSync(new URL("./server.ts", import.meta.url))).toBe(false);
+    expect(existsSync(new URL("./app-server.ts", import.meta.url))).toBe(true);
   });
 });

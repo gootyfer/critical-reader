@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 
-import { buildServer } from "../server.js";
+import { buildServer } from "../app-server.js";
 import type { ServerPolicy } from "../server-policy.js";
 
 const servers: Awaited<ReturnType<typeof buildServer>>[] = [];

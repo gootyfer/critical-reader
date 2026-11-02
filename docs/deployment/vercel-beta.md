@@ -28,6 +28,8 @@ Configura un presupuesto mensual de 10 USD y alertas al alcanzar 5 y 8 USD. Guar
 
 La API conserva una copia local de los esquemas de contrato para que la función sea autocontenida. Una prueba exige que sea idéntica, byte por byte, al contrato canónico de `packages/contracts`; así evitamos symlinks externos que el adaptador Fastify de Vercel no incluye en el bundle.
 
+No crees módulos auxiliares llamados `src/app.ts` ni `src/server.ts`: Vercel también los considera entrypoints Fastify. El constructor interno vive en `src/app-server.ts` para que el único entrypoint detectado sea `src/index.ts`.
+
 `apps/api/vercel.json` fija la región `fra1`. No declares `src/index.ts` en la sección `functions`: Vercel detecta automáticamente la aplicación Fastify y un patrón manual impide la compilación. El timeout del proveedor se mantiene en 30 segundos, por debajo de la duración predeterminada de las Functions con Fluid Compute.
 
 ## 3. Variables por entorno
